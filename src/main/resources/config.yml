@@ -1,0 +1,12 @@
+modules:
+- logger
+- pads
+- teleport
+- portals
+- permissions
+- chat
+- signcolors
+chat:
+  default-format: '&7[Guest] &8<player>&f: <message>'
+  formats:
+    testformat: '&4<player>&7: &c<message>'

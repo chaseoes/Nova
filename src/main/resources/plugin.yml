@@ -1,0 +1,32 @@
+name: ${project.name}
+main: ${project.groupId}.${upload.dbo.slug}.${project.name}
+version: ${project.version}
+description: ${project.description}
+commands:
+  ${upload.dbo.slug}:
+    description: The central command for the ${project.name} plugin.
+    usage: /<command> [args]
+  teleport:
+    description: Teleport to another player.
+    usage: /<command> [args]
+    aliases: [tp]
+  teleporthere:
+    description: Teleport another player to yourself.
+    usage: /<command> [args]
+    aliases: [tphere]
+  teleportaccept:
+    description: Accept a teleport request.
+    usage: /<command> [args]
+    aliases: [tpaccept,tpa]
+  teleportdeny:
+    description: Deny a teleport request.
+    usage: /<command> [args]
+    aliases: [tpdeny,tpd]
+  teleporttoggle:
+    description: Toggle receiving teleport requests.
+    usage: /<command> [args]
+    aliases: [tptoggle,tpt]
+  permissions:
+    description: Nova permissions handler.
+    usage: /<command> [args]
+    aliases: [p,perm,perms]
