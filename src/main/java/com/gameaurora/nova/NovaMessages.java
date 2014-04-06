@@ -7,5 +7,7 @@ public class NovaMessages {
     public static final String PREFIX_GENERAL = ChatColor.AQUA + "[Nova] " + ChatColor.GRAY;
     public static final String PREFIX_ERROR = ChatColor.AQUA + "[Nova] " + ChatColor.RED;
     public static final String NO_PERMISSION = PREFIX_ERROR + "You don't have permission to do that.";
+    public static final String MUST_BE_PLAYER = "[Nova] That command can only be used as a player.";
+    public static final String CHANGE_SERVER = PREFIX_GENERAL + "Switching servers...";
 
 }

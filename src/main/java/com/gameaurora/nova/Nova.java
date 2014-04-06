@@ -6,10 +6,15 @@ import org.bukkit.entity.Player;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import com.gameaurora.modules.autosave.AutosaveTask;
 import com.gameaurora.nova.events.listeners.RegionEventListeners;
 import com.gameaurora.nova.modules.chat.ChatData;
 import com.gameaurora.nova.modules.chat.ChatListeners;
+import com.gameaurora.nova.modules.hidestream.HideStreamListener;
+import com.gameaurora.nova.modules.hubcommand.HubCommand;
+import com.gameaurora.nova.modules.joinspawn.JoinSpawnListener;
 import com.gameaurora.nova.modules.logger.LogListener;
+import com.gameaurora.nova.modules.onlyproxyjoin.OnlyProxyJoinListener;
 import com.gameaurora.nova.modules.pads.PadListener;
 import com.gameaurora.nova.modules.permissions.PermissionCommands;
 import com.gameaurora.nova.modules.permissions.PermissionUtilities;
@@ -38,12 +43,14 @@ public class Nova extends JavaPlugin {
 		getServer().getPluginManager().registerEvents(new RegionEventListeners(), this);
 		getServer().getMessenger().registerOutgoingPluginChannel(this, "BungeeCord");
 	}
-	
+
 	public void onReload() {
 		chatData.reloadProfiles();
+		getServer().getScheduler().cancelTasks(Nova.getInstance());
 	}
 
 	public void onDisable() {
+		getServer().getScheduler().cancelTasks(Nova.getInstance());
 		PermissionUtilities.getUtilities().onDisable();
 		instance = null;
 	}
@@ -74,7 +81,7 @@ public class Nova extends JavaPlugin {
 			player.teleport(getServer().getWorld("lobby").getSpawnLocation());
 		}
 	}
-	
+
 	private void loadModules() {
 		PluginManager pm = getServer().getPluginManager();
 		if (moduleIsEnabled("logger")) {
@@ -92,23 +99,43 @@ public class Nova extends JavaPlugin {
 			getCommand("teleportdeny").setExecutor(new TeleportCommand());
 			getCommand("teleporttoggle").setExecutor(new TeleportCommand());
 		}
-		
+
 		if (moduleIsEnabled("portals")) {
 			pm.registerEvents(new PortalListener(), this);
 		}
-		
+
 		if (moduleIsEnabled("permissions")) {
 			getCommand("permissions").setExecutor(new PermissionCommands());
 			PermissionUtilities.getUtilities().onEnable();
 		}
-		
+
 		if (moduleIsEnabled("chat")) {
 			chatData.reloadProfiles();
 			pm.registerEvents(new ChatListeners(), this);
 		}
-		
+
 		if (moduleIsEnabled("signcolors")) {
 			pm.registerEvents(new SignColorListener(), this);
+		}
+
+		if (moduleIsEnabled("joinspawn")) {
+			pm.registerEvents(new JoinSpawnListener(), this);
+		}
+
+		if (moduleIsEnabled("onlyproxyjoin")) {
+			pm.registerEvents(new OnlyProxyJoinListener(), this);
+		}
+
+		if (moduleIsEnabled("hubcommand")) {
+			getCommand("hub").setExecutor(new HubCommand());
+		}
+
+		if (moduleIsEnabled("hidestream")) {
+			pm.registerEvents(new HideStreamListener(), this);
+		}
+
+		if (moduleIsEnabled("autosave")) {
+			getServer().getScheduler().runTaskTimer(this, new AutosaveTask(), 0L, 1200L);
 		}
 	}
 

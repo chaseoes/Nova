@@ -6,6 +6,11 @@ modules:
 - permissions
 - chat
 - signcolors
+- joinspawn
+- onlyproxyjoin
+- hubcommand
+- hidestream
+- autosave
 chat:
   default-format: '&7[Guest] &8<player>&f: <message>'
   formats:

@@ -30,3 +30,7 @@ commands:
     description: Nova permissions handler.
     usage: /<command> [args]
     aliases: [p,perm,perms]
+  hub:
+    description: Teleport to the hub server.
+    usage: /<command> [args]
+    aliases: [lobby,l,h,spawn]

@@ -15,7 +15,7 @@ public class TeleportCommand implements CommandExecutor {
 	public boolean onCommand(CommandSender cs, Command cmnd, String string, String[] strings) {
 		if (cmnd.getName().equalsIgnoreCase("teleport")) {
 			if (!(cs instanceof Player)) {
-				cs.sendMessage("[Nova] That command can only be used as a player.");
+				cs.sendMessage(NovaMessages.MUST_BE_PLAYER);
 				return true;
 			}
 
@@ -59,7 +59,7 @@ public class TeleportCommand implements CommandExecutor {
 
 		if (cmnd.getName().equalsIgnoreCase("teleporthere")) {
 			if (!(cs instanceof Player)) {
-				cs.sendMessage("[Nova] That command can only be used as a player.");
+				cs.sendMessage(NovaMessages.MUST_BE_PLAYER);
 				return true;
 			}
 
@@ -105,7 +105,7 @@ public class TeleportCommand implements CommandExecutor {
 
 		if (cmnd.getName().equalsIgnoreCase("teleportaccept")) {
 			if (!(cs instanceof Player)) {
-				cs.sendMessage("[Nova] That command can only be used as a player.");
+				cs.sendMessage(NovaMessages.MUST_BE_PLAYER);
 				return true;
 			}
 
@@ -146,7 +146,7 @@ public class TeleportCommand implements CommandExecutor {
 
 		if (cmnd.getName().equalsIgnoreCase("teleporttoggle")) {
 			if (!(cs instanceof Player)) {
-				cs.sendMessage("[Nova] That command can only be used as a player.");
+				cs.sendMessage(NovaMessages.MUST_BE_PLAYER);
 				return true;
 			}
 
