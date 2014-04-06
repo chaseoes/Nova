@@ -19,7 +19,7 @@ public class JoinSpawnListener implements Listener {
 		Player player = event.getPlayer();
 
 		if (lobby != null) {
-			player.teleport(new Location(lobby, 0.5, 70, 0.5, -180, 0));
+			player.teleport(new Location(lobby, 0.5, 65, 0.5, -180, 0));
 			GeneralUtilities.launchRandomFirework(player.getLocation());
 		}
 	}
