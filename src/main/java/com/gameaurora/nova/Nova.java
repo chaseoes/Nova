@@ -1,16 +1,11 @@
 package com.gameaurora.nova;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
-import org.bukkit.plugin.PluginManager;
-import org.bukkit.plugin.java.JavaPlugin;
-
 import com.gameaurora.modules.autosave.AutosaveTask;
+import com.gameaurora.modules.bans.BanCommand;
+import com.gameaurora.modules.bans.BanUtilities;
+import com.gameaurora.modules.bans.BansListener;
+import com.gameaurora.modules.bans.IsBannedCommand;
+import com.gameaurora.modules.bans.UnbanCommand;
 import com.gameaurora.nova.events.listeners.RegionEventListeners;
 import com.gameaurora.nova.modules.adminmode.AdminModeCommand;
 import com.gameaurora.nova.modules.adminmode.AdminModeListeners;
@@ -30,6 +25,16 @@ import com.gameaurora.nova.modules.signcolors.SignColorListener;
 import com.gameaurora.nova.modules.teleport.TeleportCommand;
 import com.gameaurora.nova.modules.teleport.TeleportData;
 import com.gameaurora.nova.utilities.PlayerStateStorage;
+import com.gameaurora.nova.utilities.SQLUtilities;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
+import org.bukkit.plugin.PluginManager;
+import org.bukkit.plugin.java.JavaPlugin;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 
 public class Nova extends JavaPlugin {
 
@@ -38,6 +43,7 @@ public class Nova extends JavaPlugin {
 	public HashMap<String, PlayerStateStorage> adminPlayerStates = new HashMap<String, PlayerStateStorage>();
 	public TeleportData teleportData;
 	public ChatData chatData;
+    private SQLUtilities sql;
 
 	public static Nova getInstance() {
 		return instance;
@@ -49,6 +55,7 @@ public class Nova extends JavaPlugin {
 		saveConfig();
 		teleportData = new TeleportData();
 		chatData = new ChatData();
+        sql = new SQLUtilities(this);
 		loadModules();
 		getServer().getPluginManager().registerEvents(new RegionEventListeners(), this);
 		getServer().getMessenger().registerOutgoingPluginChannel(this, "BungeeCord");
@@ -78,6 +85,7 @@ public class Nova extends JavaPlugin {
 		
 		getServer().getScheduler().cancelTasks(Nova.getInstance());
 		PermissionUtilities.getUtilities().onDisable();
+        sql.close();
 		instance = null;
 	}
 
@@ -169,6 +177,18 @@ public class Nova extends JavaPlugin {
 			getCommand("adminmode").setExecutor(new AdminModeCommand());
 			pm.registerEvents(new AdminModeListeners(), this);
 		}
+
+        if (moduleIsEnabled("bans")) {
+            BanUtilities.getInstance();
+            getCommand("ban").setExecutor(new BanCommand());
+            getCommand("unban").setExecutor(new UnbanCommand());
+            getCommand("isbanned").setExecutor(new IsBannedCommand());
+            getServer().getPluginManager().registerEvents(new BansListener(), this);
+        }
 	}
+
+    public SQLUtilities getSQL() {
+        return sql;
+    }
 
 }

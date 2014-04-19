@@ -38,3 +38,12 @@ commands:
     description: Admin mode.
     usage: /<command> [args]
     aliases: [a]
+  ban:
+    description: Ban command.
+    usage: /<command> [args]
+  unban:
+    description: Unan command.
+    usage: /<command> [args]
+  isbanned:
+    description: Isbanned command.
+    usage: /<command> [args]
