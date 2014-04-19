@@ -11,6 +11,7 @@ modules:
 - hubcommand
 - hidestream
 - autosave
+- adminmode
 chat:
   default-format: '&7[Guest] &8<player>&f: <message>'
   formats:

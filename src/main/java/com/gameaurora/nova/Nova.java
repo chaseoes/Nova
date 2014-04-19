@@ -1,5 +1,9 @@
 package com.gameaurora.nova;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -8,6 +12,9 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import com.gameaurora.modules.autosave.AutosaveTask;
 import com.gameaurora.nova.events.listeners.RegionEventListeners;
+import com.gameaurora.nova.modules.adminmode.AdminModeCommand;
+import com.gameaurora.nova.modules.adminmode.AdminModeListeners;
+import com.gameaurora.nova.modules.adminmode.AdminModeTask;
 import com.gameaurora.nova.modules.chat.ChatData;
 import com.gameaurora.nova.modules.chat.ChatListeners;
 import com.gameaurora.nova.modules.hidestream.HideStreamListener;
@@ -22,10 +29,13 @@ import com.gameaurora.nova.modules.portals.PortalListener;
 import com.gameaurora.nova.modules.signcolors.SignColorListener;
 import com.gameaurora.nova.modules.teleport.TeleportCommand;
 import com.gameaurora.nova.modules.teleport.TeleportData;
+import com.gameaurora.nova.utilities.PlayerStateStorage;
 
 public class Nova extends JavaPlugin {
 
 	private static Nova instance;
+	public List<String> adminPlayers = new ArrayList<String>();
+	public HashMap<String, PlayerStateStorage> adminPlayerStates = new HashMap<String, PlayerStateStorage>();
 	public TeleportData teleportData;
 	public ChatData chatData;
 
@@ -45,11 +55,27 @@ public class Nova extends JavaPlugin {
 	}
 
 	public void onReload() {
+		for (String s : adminPlayers) {
+			Player player = getServer().getPlayerExact(s);
+			if (player != null) {
+				String[] str = null;
+				new AdminModeCommand().onCommand((CommandSender) player, getCommand("a"), "", str);
+			}
+		}
+		
 		chatData.reloadProfiles();
 		getServer().getScheduler().cancelTasks(Nova.getInstance());
 	}
 
 	public void onDisable() {
+		for (String s : adminPlayers) {
+			Player player = getServer().getPlayerExact(s);
+			if (player != null) {
+				String[] str = null;
+				new AdminModeCommand().onCommand((CommandSender) player, getCommand("a"), "", str);
+			}
+		}
+		
 		getServer().getScheduler().cancelTasks(Nova.getInstance());
 		PermissionUtilities.getUtilities().onDisable();
 		instance = null;
@@ -136,6 +162,12 @@ public class Nova extends JavaPlugin {
 
 		if (moduleIsEnabled("autosave")) {
 			getServer().getScheduler().runTaskTimer(this, new AutosaveTask(), 0L, 1200L);
+		}
+
+		if (moduleIsEnabled("adminmode")) {
+			getServer().getScheduler().runTaskTimer(this, new AdminModeTask(), 0L, 20L);
+			getCommand("adminmode").setExecutor(new AdminModeCommand());
+			pm.registerEvents(new AdminModeListeners(), this);
 		}
 	}
 

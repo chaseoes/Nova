@@ -34,3 +34,7 @@ commands:
     description: Teleport to the hub server.
     usage: /<command> [args]
     aliases: [lobby,l,h,spawn]
+  adminmode:
+    description: Admin mode.
+    usage: /<command> [args]
+    aliases: [a]
