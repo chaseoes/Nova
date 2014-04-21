@@ -11,7 +11,6 @@ public class PortalListener implements Listener {
 
 	@EventHandler(priority = EventPriority.HIGHEST)
 	public void onRegionEnter(RegionEnterEvent event) {
-		System.out.print(event.getRegionName());
 		if (event.getRegionName().startsWith("server-")) {
 			String server = event.getRegionName().replace("server-", "");
 			GeneralUtilities.sendToServer(event.getPlayer(), server);
