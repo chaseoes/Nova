@@ -5,6 +5,7 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
+import com.gameaurora.nova.Nova;
 import com.gameaurora.nova.NovaMessages;
 import com.gameaurora.nova.utilities.GeneralUtilities;
 
@@ -17,6 +18,13 @@ public class HubCommand implements CommandExecutor {
 		}
 
 		Player player = (Player) cs;
+		if (strings.length > 0) {
+			if (strings[0].equalsIgnoreCase("-o")) {
+				player.teleport(Nova.LOBBY_LOCATION);
+			}
+			return true;
+		}
+		
 		GeneralUtilities.sendToServer(player, "hub");
 		return true;
 	}
