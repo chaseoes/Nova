@@ -9,13 +9,13 @@ import com.gameaurora.nova.NovaMessages;
 import com.gameaurora.nova.utilities.GeneralUtilities;
 
 public class HubCommand implements CommandExecutor {
-	
+
 	public boolean onCommand(CommandSender cs, Command cmnd, String string, String[] strings) {
 		if (!(cs instanceof Player)) {
 			cs.sendMessage(NovaMessages.MUST_BE_PLAYER);
 			return true;
 		}
-		
+
 		Player player = (Player) cs;
 		GeneralUtilities.sendToServer(player, "hub");
 		return true;

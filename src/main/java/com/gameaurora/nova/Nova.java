@@ -26,6 +26,8 @@ import com.gameaurora.nova.modules.teleport.TeleportCommand;
 import com.gameaurora.nova.modules.teleport.TeleportData;
 import com.gameaurora.nova.utilities.PlayerStateStorage;
 import com.gameaurora.nova.utilities.SQLUtilities;
+
+import org.bukkit.Location;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -43,7 +45,8 @@ public class Nova extends JavaPlugin {
 	public HashMap<String, PlayerStateStorage> adminPlayerStates = new HashMap<String, PlayerStateStorage>();
 	public TeleportData teleportData;
 	public ChatData chatData;
-    private SQLUtilities sql;
+	private SQLUtilities sql;
+	public static Location LOBBY_LOCATION;
 
 	public static Nova getInstance() {
 		return instance;
@@ -55,10 +58,16 @@ public class Nova extends JavaPlugin {
 		saveConfig();
 		teleportData = new TeleportData();
 		chatData = new ChatData();
-        sql = new SQLUtilities(this);
+		
+		if (moduleIsEnabled("bans")) {
+			sql = new SQLUtilities(this);
+		}
+		
 		loadModules();
 		getServer().getPluginManager().registerEvents(new RegionEventListeners(), this);
 		getServer().getMessenger().registerOutgoingPluginChannel(this, "BungeeCord");
+		
+		loadLobbyLocation();
 	}
 
 	public void onReload() {
@@ -69,9 +78,11 @@ public class Nova extends JavaPlugin {
 				new AdminModeCommand().onCommand((CommandSender) player, getCommand("a"), "", str);
 			}
 		}
-		
+
 		chatData.reloadProfiles();
 		getServer().getScheduler().cancelTasks(Nova.getInstance());
+		
+		loadLobbyLocation();
 	}
 
 	public void onDisable() {
@@ -82,10 +93,14 @@ public class Nova extends JavaPlugin {
 				new AdminModeCommand().onCommand((CommandSender) player, getCommand("a"), "", str);
 			}
 		}
-		
+
 		getServer().getScheduler().cancelTasks(Nova.getInstance());
 		PermissionUtilities.getUtilities().onDisable();
-        sql.close();
+		
+		if (sql != null) {
+			sql.close();
+		}
+		
 		instance = null;
 	}
 
@@ -178,17 +193,21 @@ public class Nova extends JavaPlugin {
 			pm.registerEvents(new AdminModeListeners(), this);
 		}
 
-        if (moduleIsEnabled("bans")) {
-            BanUtilities.getInstance();
-            getCommand("ban").setExecutor(new BanCommand());
-            getCommand("unban").setExecutor(new UnbanCommand());
-            getCommand("isbanned").setExecutor(new IsBannedCommand());
-            getServer().getPluginManager().registerEvents(new BansListener(), this);
-        }
+		if (moduleIsEnabled("bans")) {
+			BanUtilities.getInstance();
+			getCommand("ban").setExecutor(new BanCommand());
+			getCommand("unban").setExecutor(new UnbanCommand());
+			getCommand("isbanned").setExecutor(new IsBannedCommand());
+			getServer().getPluginManager().registerEvents(new BansListener(), this);
+		}
 	}
 
-    public SQLUtilities getSQL() {
-        return sql;
-    }
+	public SQLUtilities getSQL() {
+		return sql;
+	}
+	
+	private void loadLobbyLocation() {
+		LOBBY_LOCATION = new Location(getInstance().getServer().getWorld("lobby"), 0.5, 65, 0.5, -180, 0);
+	}
 
 }

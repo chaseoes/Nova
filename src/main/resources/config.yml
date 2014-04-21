@@ -13,6 +13,7 @@ modules:
 - autosave
 - adminmode
 - bans
+server-name: null
 chat:
   default-format: '&7[Guest] &8<player>&f: <message>'
   formats:

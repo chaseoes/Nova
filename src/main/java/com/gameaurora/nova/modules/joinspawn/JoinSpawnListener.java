@@ -1,6 +1,5 @@
 package com.gameaurora.nova.modules.joinspawn;
 
-import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -19,7 +18,7 @@ public class JoinSpawnListener implements Listener {
 		Player player = event.getPlayer();
 
 		if (lobby != null) {
-			player.teleport(new Location(lobby, 0.5, 65, 0.5, -180, 0));
+			player.teleport(Nova.LOBBY_LOCATION);
 			GeneralUtilities.launchRandomFirework(player.getLocation());
 		}
 	}
