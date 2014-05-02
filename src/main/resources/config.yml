@@ -3,7 +3,6 @@ modules:
 - pads
 - teleport
 - portals
-- permissions
 - chat
 - signcolors
 - joinspawn

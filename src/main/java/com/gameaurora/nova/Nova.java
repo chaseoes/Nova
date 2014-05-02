@@ -18,8 +18,6 @@ import com.gameaurora.nova.modules.joinspawn.JoinSpawnListener;
 import com.gameaurora.nova.modules.logger.LogListener;
 import com.gameaurora.nova.modules.onlyproxyjoin.OnlyProxyJoinListener;
 import com.gameaurora.nova.modules.pads.PadListener;
-import com.gameaurora.nova.modules.permissions.PermissionCommands;
-import com.gameaurora.nova.modules.permissions.PermissionUtilities;
 import com.gameaurora.nova.modules.portals.PortalListener;
 import com.gameaurora.nova.modules.signcolors.SignColorListener;
 import com.gameaurora.nova.modules.teleport.TeleportCommand;
@@ -95,7 +93,6 @@ public class Nova extends JavaPlugin {
 		}
 
 		getServer().getScheduler().cancelTasks(Nova.getInstance());
-		PermissionUtilities.getUtilities().onDisable();
 		
 		if (sql != null) {
 			sql.close();
@@ -151,11 +148,6 @@ public class Nova extends JavaPlugin {
 
 		if (moduleIsEnabled("portals")) {
 			pm.registerEvents(new PortalListener(), this);
-		}
-
-		if (moduleIsEnabled("permissions")) {
-			getCommand("permissions").setExecutor(new PermissionCommands());
-			PermissionUtilities.getUtilities().onEnable();
 		}
 
 		if (moduleIsEnabled("chat")) {
