@@ -3,7 +3,7 @@ package com.gameaurora.nova.modules.chat;
 import org.bukkit.entity.Player;
 
 import com.gameaurora.nova.Nova;
-import com.gameaurora.nova.modules.permissions.PermissionUtilities;
+import com.gameaurora.nova.utilities.PermissionUtilities;
 
 public class ChatProfile {
 	
@@ -19,7 +19,7 @@ public class ChatProfile {
 	}
 	
 	private void load() {
-		group = PermissionUtilities.getUtilities().getGroup(getPlayer().getName());
+		group = PermissionUtilities.getGroupForPlayer(getPlayer());
 		chatFormat = Nova.getInstance().getConfig().getString("chat.formats." + getGroup());
 		if (chatFormat == null) {
 			chatFormat = Nova.getInstance().getConfig().getString("chat.default-format");
