@@ -2,7 +2,6 @@ package com.gameaurora.nova.modules.chat;
 
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -24,7 +23,7 @@ public class ChatListeners implements Listener {
 			if (profiles.containsKey(player.getName())) {
 				ChatProfile profile = Nova.getInstance().chatData.profiles.get(player.getName());
 				if (profile.isLoaded()) {
-					event.setFormat(ChatColor.translateAlternateColorCodes('&', profile.getChatFormat().replace("<player>", "%1$s").replace("<message>", "%2$s")));
+					event.setFormat(profile.getChatFormat());
 				} else {
 					player.sendMessage(notReady());
 					event.setCancelled(true);

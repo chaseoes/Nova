@@ -20,10 +20,7 @@ public class ChatProfile {
 	
 	private void load() {
 		group = PermissionUtilities.getGroupForPlayer(getPlayer());
-		chatFormat = Nova.getInstance().getConfig().getString("chat.formats." + getGroup());
-		if (chatFormat == null) {
-			chatFormat = Nova.getInstance().getConfig().getString("chat.default-format");
-		}
+		chatFormat = PermissionUtilities.getChatFormat(getPlayer());
 		loaded = true;
 	}
 	

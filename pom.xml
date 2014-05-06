@@ -68,6 +68,10 @@
 			<id>sk89q</id>
 			<url>http://maven.sk89q.com/repo/</url>
 		</repository>
+		<repository>
+			<id>tyrannyofheaven.org</id>
+			<url>http://maven.tyrannyofheaven.org/</url>
+		</repository>
 	</repositories>
 	<dependencies>
 		<dependency>
@@ -84,6 +88,12 @@
 			<groupId>com.sk89q</groupId>
 			<artifactId>worldedit</artifactId>
 			<version>5.5.8-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>org.tyrannyofheaven.bukkit</groupId>
+			<artifactId>zPermissions</artifactId>
+			<version>[0.9.8,)</version>
+			<scope>provided</scope>
 		</dependency>
 	</dependencies>
 </project>

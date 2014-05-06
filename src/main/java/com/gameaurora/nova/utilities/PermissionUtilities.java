@@ -1,27 +1,26 @@
 package com.gameaurora.nova.utilities;
 
-import java.util.HashSet;
-import java.util.Set;
-
+import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
-import org.bukkit.permissions.PermissionAttachmentInfo;
+import org.tyrannyofheaven.bukkit.zPermissions.ZPermissionsService;
+
+import com.gameaurora.nova.Nova;
 
 public class PermissionUtilities {
-	
-	private static final String GROUP_PREFIX = "group.";
-	
+
+	private static ZPermissionsService service = Nova.getInstance().getServer().getServicesManager().load(ZPermissionsService.class);
+
 	public static String getGroupForPlayer(Player player) {
-		return getGroupsForPlayer(player).iterator().next();
-	}
-	
-	public static Set<String> getGroupsForPlayer(Player player) {
-	    Set<String> groups = new HashSet<String>();
-	    for (PermissionAttachmentInfo pai : player.getEffectivePermissions()) {
-	        if (!pai.getPermission().startsWith(GROUP_PREFIX) || !pai.getValue())
-	            continue;
-	        groups.add(pai.getPermission().substring(GROUP_PREFIX.length()));
-	    }
-	    return groups;
+		return service.getPlayerPrimaryGroup(player.getUniqueId());
 	}
 
+	public static String getChatFormat(Player player) {
+		try {
+			String prefix = service.getGroupMetadata(getGroupForPlayer(player), "prefix", Object.class).toString();
+			return ChatColor.translateAlternateColorCodes('&', prefix.replace("<player>", "%1$s").replace("<message>", "%2$s"));
+		} catch (Exception e) {
+			return ChatColor.RED + getGroupForPlayer(player) + " CHAT ERROR" + "\n" + player.getUniqueId().toString();
+		}
+
+	}
 }
