@@ -30,7 +30,7 @@ public class AdminModeListeners implements Listener {
 				if (event.getItem().getType() == Material.INK_SACK) {
 					event.getPlayer().setResourcePack("http://emeraldsmc.com/downloads/resource_pack/resource_pack_1.7.4_256x.zip");
 				}
-				
+
 				if (event.getItem().getType() == Material.WATCH) {
 					event.getPlayer().performCommand("v");
 				}
@@ -74,9 +74,15 @@ public class AdminModeListeners implements Listener {
 	@EventHandler(priority = EventPriority.HIGHEST)
 	public void onInventoryMoveItem(InventoryClickEvent event) {
 		if (Nova.getInstance().adminPlayers.contains(event.getWhoClicked().getName())) {
-			if (ChatColor.stripColor(event.getCurrentItem().getItemMeta().getDisplayName()).startsWith("Admin")) {
-				event.setCancelled(true);
-				return;
+			if (event.getCurrentItem() != null) {
+				if (event.getCurrentItem().hasItemMeta()) {
+					if (event.getCurrentItem().getItemMeta().hasDisplayName()) {
+						if (ChatColor.stripColor(event.getCurrentItem().getItemMeta().getDisplayName()).startsWith("Admin")) {
+							event.setCancelled(true);
+							return;
+						}
+					}
+				}
 			}
 		}
 	}
