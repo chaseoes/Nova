@@ -42,7 +42,6 @@ public class PadUtilities {
 		for (String dist : Nova.getInstance().getConfig().getConfigurationSection("launch-pads").getKeys(false)) {
 			double distance = Double.valueOf(dist.replace("-", "."));
 			List<String> locations = Nova.getInstance().getConfig().getStringList("launch-pads." + String.valueOf(distance).replace(".", "-"));
-			System.out.print(dist + " " + distance + " REMOVING: " + SerializableLocation.locationToString(location));
 			locations.remove(SerializableLocation.locationToString(location));
 			Nova.getInstance().getConfig().set("launch-pads." + String.valueOf(distance).replace(".", "-"), locations);
 			Nova.getInstance().saveConfig();

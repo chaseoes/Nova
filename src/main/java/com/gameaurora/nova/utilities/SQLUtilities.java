@@ -21,7 +21,6 @@ public class SQLUtilities {
         try {
             conn = DriverManager.getConnection(url, username, password);
             connected = true;
-            System.out.println("MYSQL CONNECTED");
         } catch (Exception e) {
             e.printStackTrace();
             connected = false;

@@ -42,7 +42,6 @@ public class BanUtilities {
     }
 
     public void banPlayer(final UUID player, final String reason, final Runnable successCallback, final Runnable errorCallback) {
-        System.out.println("BANNING UUID " + player + " FOR " + reason);
         synchronized (bans) {
             bans.put(player, reason);
         }
