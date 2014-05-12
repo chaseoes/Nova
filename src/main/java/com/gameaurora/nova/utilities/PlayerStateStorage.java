@@ -40,6 +40,7 @@ public class PlayerStateStorage {
 		armorContents = player.getInventory().getArmorContents();
 	}
 
+	@SuppressWarnings("deprecation")
 	public void clear() {
 		player.setAllowFlight(false);
 		player.setFlying(false);

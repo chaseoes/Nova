@@ -16,12 +16,18 @@ import com.gameaurora.nova.modules.hidestream.HideStreamListener;
 import com.gameaurora.nova.modules.hubcommand.HubCommand;
 import com.gameaurora.nova.modules.joinspawn.JoinSpawnListener;
 import com.gameaurora.nova.modules.logger.LogListener;
+import com.gameaurora.nova.modules.menu.MenuListeners;
+import com.gameaurora.nova.modules.menu.MenuUtilities;
 import com.gameaurora.nova.modules.onlyproxyjoin.OnlyProxyJoinListener;
+import com.gameaurora.nova.modules.pads.PadCommands;
 import com.gameaurora.nova.modules.pads.PadListener;
 import com.gameaurora.nova.modules.portals.PortalListener;
+import com.gameaurora.nova.modules.punch.PunchListener;
 import com.gameaurora.nova.modules.signcolors.SignColorListener;
+import com.gameaurora.nova.modules.signlinks.SignLinkListener;
 import com.gameaurora.nova.modules.teleport.TeleportCommand;
 import com.gameaurora.nova.modules.teleport.TeleportData;
+import com.gameaurora.nova.utilities.GeneralUtilities;
 import com.gameaurora.nova.utilities.PlayerStateStorage;
 import com.gameaurora.nova.utilities.SQLUtilities;
 
@@ -31,12 +37,16 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.plugin.messaging.PluginMessageListener;
 
+import java.io.ByteArrayInputStream;
+import java.io.DataInputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-public class Nova extends JavaPlugin {
+public class Nova extends JavaPlugin implements PluginMessageListener {
 
 	private static Nova instance;
 	public List<String> adminPlayers = new ArrayList<String>();
@@ -56,16 +66,21 @@ public class Nova extends JavaPlugin {
 		saveConfig();
 		teleportData = new TeleportData();
 		chatData = new ChatData();
-		
+
 		if (moduleIsEnabled("bans")) {
 			sql = new SQLUtilities(this);
 		}
-		
+
 		loadModules();
 		getServer().getPluginManager().registerEvents(new RegionEventListeners(), this);
 		getServer().getMessenger().registerOutgoingPluginChannel(this, "BungeeCord");
-		
+		getServer().getMessenger().registerIncomingPluginChannel(this, "BungeeCord", this);
+
 		loadLobbyLocation();
+
+		for (String server : MenuUtilities.icons.keySet()) {
+			GeneralUtilities.refreshPlayerCount(server);
+		}
 	}
 
 	public void onReload() {
@@ -79,7 +94,7 @@ public class Nova extends JavaPlugin {
 
 		chatData.reloadProfiles();
 		getServer().getScheduler().cancelTasks(Nova.getInstance());
-		
+
 		loadLobbyLocation();
 	}
 
@@ -93,11 +108,11 @@ public class Nova extends JavaPlugin {
 		}
 
 		getServer().getScheduler().cancelTasks(Nova.getInstance());
-		
+
 		if (sql != null) {
 			sql.close();
 		}
-		
+
 		instance = null;
 	}
 
@@ -118,6 +133,26 @@ public class Nova extends JavaPlugin {
 		return true;
 	}
 
+	@Override
+	public void onPluginMessageReceived(String channel, Player player, byte[] message) {
+		if (!channel.equals("BungeeCord")) {
+			return;
+		}
+
+		DataInputStream in = new DataInputStream(new ByteArrayInputStream(message));
+
+		try {
+			String subchannel = in.readUTF();
+			if (subchannel.equals("PlayerCount")) {
+				String server = in.readUTF();
+				int playerCount = in.readInt();
+				GeneralUtilities.setPlayerCount(server, playerCount);
+			}
+		} catch (IOException e) {
+			// There was an issue in creating the subchannel string
+		}
+	}
+
 	public boolean moduleIsEnabled(String name) {
 		return getConfig().getStringList("modules").contains(name);
 	}
@@ -136,6 +171,7 @@ public class Nova extends JavaPlugin {
 
 		if (moduleIsEnabled("pads")) {
 			pm.registerEvents(new PadListener(), this);
+			getCommand("lp").setExecutor(new PadCommands());
 		}
 
 		if (moduleIsEnabled("teleport")) {
@@ -192,12 +228,25 @@ public class Nova extends JavaPlugin {
 			getCommand("isbanned").setExecutor(new IsBannedCommand());
 			getServer().getPluginManager().registerEvents(new BansListener(), this);
 		}
+
+		if (moduleIsEnabled("menu")) {
+			MenuUtilities.loadIcons();
+			pm.registerEvents(new MenuListeners(), this);
+		}
+		
+		if (moduleIsEnabled("signlinks")) {
+			pm.registerEvents(new SignLinkListener(), this);
+		}
+		
+		if (moduleIsEnabled("punch")) {
+			pm.registerEvents(new PunchListener(), this);
+		}
 	}
 
 	public SQLUtilities getSQL() {
 		return sql;
 	}
-	
+
 	private void loadLobbyLocation() {
 		LOBBY_LOCATION = new Location(getInstance().getServer().getWorld("lobby"), 0.5, 65, 0.5, -180, 0);
 	}

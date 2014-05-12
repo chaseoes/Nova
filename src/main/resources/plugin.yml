@@ -48,3 +48,6 @@ commands:
   isbanned:
     description: Isbanned command.
     usage: /<command> [args]
+  lp:
+    description: Launch pads!
+    usage: /<command> [args]

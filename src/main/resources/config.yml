@@ -12,6 +12,10 @@ modules:
 - autosave
 - adminmode
 - bans
+- loghoppers
+- menu
+- signlinks
+- punch
 server-name: null
 database:
   hostname: localhost

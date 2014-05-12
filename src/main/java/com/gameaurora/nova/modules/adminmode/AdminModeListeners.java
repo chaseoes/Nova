@@ -64,9 +64,13 @@ public class AdminModeListeners implements Listener {
 	@EventHandler(priority = EventPriority.HIGHEST)
 	public void onPlayerDropItem(PlayerDropItemEvent event) {
 		if (Nova.getInstance().adminPlayers.contains(event.getPlayer().getName())) {
-			if (ChatColor.stripColor(event.getItemDrop().getItemStack().getItemMeta().getDisplayName()).startsWith("Admin")) {
-				event.getItemDrop().remove();
-				return;
+			if (event.getItemDrop().getItemStack().hasItemMeta()) {
+				if( event.getItemDrop().getItemStack().getItemMeta().hasDisplayName()) {
+					if (ChatColor.stripColor(event.getItemDrop().getItemStack().getItemMeta().getDisplayName()).startsWith("Admin")) {
+						event.getItemDrop().remove();
+						return;
+					}
+				}
 			}
 		}
 	}

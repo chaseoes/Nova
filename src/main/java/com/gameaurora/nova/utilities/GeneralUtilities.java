@@ -1,5 +1,6 @@
 package com.gameaurora.nova.utilities;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Random;
 import java.util.Set;
@@ -18,6 +19,8 @@ import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
 
 public class GeneralUtilities {
+
+	private static HashMap<String, Integer> playerCounts = new HashMap<String, Integer>();
 
 	public static void launchRandomFirework(Location location) {
 		Random random = new Random();
@@ -48,12 +51,32 @@ public class GeneralUtilities {
 		player.sendPluginMessage(Nova.getInstance(), "BungeeCord", out.toByteArray());
 	}
 	
+	public static void refreshPlayerCount(String server) {
+		ByteArrayDataOutput out = ByteStreams.newDataOutput();
+		out.writeUTF("PlayerCount");
+		out.writeUTF(server.toLowerCase().replace(" ", ""));
+		Nova.getInstance().getServer().sendPluginMessage(Nova.getInstance(), "BungeeCord", out.toByteArray());	
+	}
+
+	public static int getPlayerCount(String s) {
+		String server = s.toLowerCase().replace(" ", "");
+		if (playerCounts.containsKey(server)) {
+			return playerCounts.get(server);
+		}
+		return 0;
+	}
+	
+	public static void setPlayerCount(String server, int i) {
+		playerCounts.remove(server);
+		playerCounts.put(server, i);
+	}
+
 	public static void clearInventory(Player player) {
-        player.getInventory().clear();
-        player.getInventory().setHelmet(null);
-        player.getInventory().setChestplate(null);
-        player.getInventory().setLeggings(null);
-        player.getInventory().setBoots(null);
+		player.getInventory().clear();
+		player.getInventory().setHelmet(null);
+		player.getInventory().setChestplate(null);
+		player.getInventory().setLeggings(null);
+		player.getInventory().setBoots(null);
 	}
 
 }
