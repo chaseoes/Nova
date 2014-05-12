@@ -1,5 +1,8 @@
 package com.gameaurora.nova.modules.menu;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -66,16 +69,19 @@ public class MenuListeners implements Listener {
 		}, 40L);
 	}
 
-	@EventHandler(priority = EventPriority.MONITOR)
+	@EventHandler(priority = EventPriority.LOWEST)
 	public void onPlayerJoin(PlayerJoinEvent event) {
 		event.getPlayer().getInventory().clear();
 		ItemStack i = new ItemStack(Material.COMPASS, 1);
 		ItemMeta im = i.getItemMeta();
 		im.setDisplayName(ChatColor.AQUA + "Server Menu");
+		List<String> lore = new ArrayList<String>();
+		lore.add(ChatColor.GRAY + "Right click to open.");
+		im.setLore(lore);
 		i.setItemMeta(im);
 		event.getPlayer().getInventory().addItem(i);
-		
-		
+
+
 		MenuUtilities.destroyCache(event.getPlayer());
 
 		Nova.getInstance().getServer().getScheduler().runTaskLater(Nova.getInstance(), new Runnable() {
