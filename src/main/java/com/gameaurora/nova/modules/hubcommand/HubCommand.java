@@ -7,7 +7,7 @@ import org.bukkit.entity.Player;
 
 import com.gameaurora.nova.Nova;
 import com.gameaurora.nova.NovaMessages;
-import com.gameaurora.nova.utilities.GeneralUtilities;
+import com.gameaurora.nova.utilities.BungeeUtilities;
 
 public class HubCommand implements CommandExecutor {
 
@@ -24,8 +24,8 @@ public class HubCommand implements CommandExecutor {
 			}
 			return true;
 		}
-		
-		GeneralUtilities.sendToServer(player, "hub");
+
+		BungeeUtilities.sendToServer(player, "hub");
 		return true;
 	}
 

@@ -57,6 +57,27 @@
 					</execution>
 				</executions>
 			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-shade-plugin</artifactId>
+				<version>2.2</version>
+				<executions>
+					<execution>
+						<phase>package</phase>
+						<goals>
+							<goal>shade</goal>
+						</goals>
+						<configuration>
+							<minimizeJar>false</minimizeJar>
+							<artifactSet>
+								<includes>
+									<include>mkremins:fanciful</include>
+								</includes>
+							</artifactSet>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
 		</plugins>
 	</build>
 	<repositories>
@@ -71,6 +92,14 @@
 		<repository>
 			<id>tyrannyofheaven.org</id>
 			<url>http://maven.tyrannyofheaven.org/</url>
+		</repository>
+		<repository>
+			<id>fanciful-mvn-repo</id>
+			<url>https://raw.github.com/mkremins/fanciful/mvn-repo/</url>
+			<snapshots>
+				<enabled>true</enabled>
+				<updatePolicy>always</updatePolicy>
+			</snapshots>
 		</repository>
 	</repositories>
 	<dependencies>
@@ -94,6 +123,11 @@
 			<artifactId>zPermissions</artifactId>
 			<version>[0.9.8,)</version>
 			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>mkremins</groupId>
+			<artifactId>fanciful</artifactId>
+			<version>0.1.5</version>
 		</dependency>
 	</dependencies>
 </project>

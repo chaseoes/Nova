@@ -10,6 +10,7 @@ import com.gameaurora.nova.events.listeners.RegionEventListeners;
 import com.gameaurora.nova.modules.adminmode.AdminModeCommand;
 import com.gameaurora.nova.modules.adminmode.AdminModeListeners;
 import com.gameaurora.nova.modules.adminmode.AdminModeTask;
+import com.gameaurora.nova.modules.arrowtp.ArrowTeleportListeners;
 import com.gameaurora.nova.modules.chat.ChatData;
 import com.gameaurora.nova.modules.chat.ChatListeners;
 import com.gameaurora.nova.modules.hidestream.HideStreamListener;
@@ -18,6 +19,8 @@ import com.gameaurora.nova.modules.joinspawn.JoinSpawnListener;
 import com.gameaurora.nova.modules.logger.LogListener;
 import com.gameaurora.nova.modules.menu.MenuListeners;
 import com.gameaurora.nova.modules.menu.MenuUtilities;
+import com.gameaurora.nova.modules.menu.PlayerCountUtilities;
+import com.gameaurora.nova.modules.nametags.ServerScoreboard;
 import com.gameaurora.nova.modules.onlyproxyjoin.OnlyProxyJoinListener;
 import com.gameaurora.nova.modules.pads.PadCommands;
 import com.gameaurora.nova.modules.pads.PadListener;
@@ -25,12 +28,15 @@ import com.gameaurora.nova.modules.portals.PortalListener;
 import com.gameaurora.nova.modules.punch.PunchListener;
 import com.gameaurora.nova.modules.signcolors.SignColorListener;
 import com.gameaurora.nova.modules.signlinks.SignLinkListener;
+import com.gameaurora.nova.modules.superspeed.SuperSpeedListener;
 import com.gameaurora.nova.modules.teleport.TeleportCommand;
 import com.gameaurora.nova.modules.teleport.TeleportData;
-import com.gameaurora.nova.utilities.GeneralUtilities;
 import com.gameaurora.nova.utilities.PlayerStateStorage;
 import com.gameaurora.nova.utilities.SQLUtilities;
 
+import mkremins.fanciful.FancyMessage;
+
+import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -55,6 +61,7 @@ public class Nova extends JavaPlugin implements PluginMessageListener {
 	public ChatData chatData;
 	private SQLUtilities sql;
 	public static Location LOBBY_LOCATION;
+	public static final String CHANNEL_SEPARATOR = "AABBCCDDEEZ";
 
 	public static Nova getInstance() {
 		return instance;
@@ -79,7 +86,7 @@ public class Nova extends JavaPlugin implements PluginMessageListener {
 		loadLobbyLocation();
 
 		for (String server : MenuUtilities.icons.keySet()) {
-			GeneralUtilities.refreshPlayerCount(server);
+			PlayerCountUtilities.requestPlayerCount(server);
 		}
 	}
 
@@ -124,11 +131,14 @@ public class Nova extends JavaPlugin implements PluginMessageListener {
 		}
 
 		if (strings[0].equalsIgnoreCase("reload")) {
-			reloadConfig();
-			saveConfig();
-			loadModules();
-			cs.sendMessage(NovaMessages.PREFIX_GENERAL + "Successfully reloaded configuration and modules.");
-			return true;
+			if (cs.hasPermission("nova.reload")) {
+				reloadConfig();
+				saveConfig();
+				loadModules();
+				cs.sendMessage(NovaMessages.PREFIX_GENERAL + "Successfully reloaded configuration and modules.");
+			} else {
+				cs.sendMessage(NovaMessages.NO_PERMISSION);
+			}
 		}
 		return true;
 	}
@@ -140,16 +150,37 @@ public class Nova extends JavaPlugin implements PluginMessageListener {
 		}
 
 		DataInputStream in = new DataInputStream(new ByteArrayInputStream(message));
-
 		try {
 			String subchannel = in.readUTF();
+			System.out.print(subchannel);
 			if (subchannel.equals("PlayerCount")) {
 				String server = in.readUTF();
 				int playerCount = in.readInt();
-				GeneralUtilities.setPlayerCount(server, playerCount);
+				PlayerCountUtilities.setPlayerCount(server, playerCount);
+				return;
 			}
+
+			if (subchannel.equals("NovaChatMessage")) {
+				String[] splitMessage = in.readUTF().split(CHANNEL_SEPARATOR);
+				String serverName = splitMessage[0];
+				System.out.print(serverName);
+				String playerName = splitMessage[1];
+				System.out.print(playerName);
+				String chatFormat = splitMessage[2];
+				System.out.print(chatFormat);
+				String chatMessage = splitMessage[3];
+				System.out.print(chatMessage);
+				String finalMessage = String.format(chatFormat, playerName, chatMessage);
+				FancyMessage fancyMessage = new FancyMessage(finalMessage).tooltip(ChatColor.GREEN + "Current Server: " + ChatColor.AQUA + serverName);
+
+				for (Player onlinePlayer : getServer().getOnlinePlayers()) {
+					fancyMessage.send(onlinePlayer);
+				}
+				return;
+			}
+
 		} catch (IOException e) {
-			// There was an issue in creating the subchannel string
+			e.printStackTrace();
 		}
 	}
 
@@ -233,13 +264,27 @@ public class Nova extends JavaPlugin implements PluginMessageListener {
 			MenuUtilities.loadIcons();
 			pm.registerEvents(new MenuListeners(), this);
 		}
-		
+
 		if (moduleIsEnabled("signlinks")) {
 			pm.registerEvents(new SignLinkListener(), this);
 		}
-		
+
 		if (moduleIsEnabled("punch")) {
 			pm.registerEvents(new PunchListener(), this);
+		}
+
+		if (moduleIsEnabled("arrowtp")) {
+			pm.registerEvents(new ArrowTeleportListeners(), this);
+		}
+
+		if (moduleIsEnabled("nametags")) {
+			ServerScoreboard.clear();
+			ServerScoreboard.load();
+			ServerScoreboard.updateBoard();
+		}
+
+		if (moduleIsEnabled("superspeed")) {
+			pm.registerEvents(new SuperSpeedListener(), this);
 		}
 	}
 

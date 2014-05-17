@@ -1,6 +1,5 @@
 package com.gameaurora.nova.utilities;
 
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Random;
 import java.util.Set;
@@ -14,13 +13,16 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.meta.FireworkMeta;
 
 import com.gameaurora.nova.Nova;
-import com.gameaurora.nova.NovaMessages;
-import com.google.common.io.ByteArrayDataOutput;
-import com.google.common.io.ByteStreams;
 
 public class GeneralUtilities {
 
-	private static HashMap<String, Integer> playerCounts = new HashMap<String, Integer>();
+	public static String getPrettyServerName() {
+		String prettyName = Nova.getInstance().getConfig().getString("pretty-server-name");
+		if (prettyName != null) {
+			return prettyName;
+		}
+		return "Unknown";
+	}
 
 	public static void launchRandomFirework(Location location) {
 		Random random = new Random();
@@ -41,34 +43,6 @@ public class GeneralUtilities {
 		builder.withColor(colors);
 		meta.addEffect(builder.build());
 		fw.setFireworkMeta(meta);
-	}
-
-	public static void sendToServer(Player player, String server) {
-		player.sendMessage(NovaMessages.CHANGE_SERVER);
-		ByteArrayDataOutput out = ByteStreams.newDataOutput();
-		out.writeUTF("Connect");
-		out.writeUTF(server);
-		player.sendPluginMessage(Nova.getInstance(), "BungeeCord", out.toByteArray());
-	}
-	
-	public static void refreshPlayerCount(String server) {
-		ByteArrayDataOutput out = ByteStreams.newDataOutput();
-		out.writeUTF("PlayerCount");
-		out.writeUTF(server.toLowerCase().replace(" ", ""));
-		Nova.getInstance().getServer().sendPluginMessage(Nova.getInstance(), "BungeeCord", out.toByteArray());	
-	}
-
-	public static int getPlayerCount(String s) {
-		String server = s.toLowerCase().replace(" ", "");
-		if (playerCounts.containsKey(server)) {
-			return playerCounts.get(server);
-		}
-		return 0;
-	}
-	
-	public static void setPlayerCount(String server, int i) {
-		playerCounts.remove(server);
-		playerCounts.put(server, i);
 	}
 
 	public static void clearInventory(Player player) {

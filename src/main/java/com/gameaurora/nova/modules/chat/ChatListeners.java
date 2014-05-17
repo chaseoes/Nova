@@ -12,11 +12,19 @@ import org.bukkit.event.player.PlayerQuitEvent;
 
 import com.gameaurora.nova.Nova;
 import com.gameaurora.nova.NovaMessages;
+import com.gameaurora.nova.modules.nametags.ServerScoreboard;
+import com.gameaurora.nova.utilities.BungeeUtilities;
 
 public class ChatListeners implements Listener {
 
-	@EventHandler
-	public void onAsyncChat(AsyncPlayerChatEvent event) {
+	@EventHandler(priority = EventPriority.HIGH)
+	public void onAsyncChat(final AsyncPlayerChatEvent event) {
+		Nova.getInstance().getServer().getScheduler().runTask(Nova.getInstance(), new Runnable() {
+			public void run() {
+				BungeeUtilities.forwardChatMessage("ALL", Nova.getInstance().getConfig().getString("pretty-server-name"), event.getPlayer().getName(), event.getFormat(), event.getMessage());
+			}
+		});
+
 		Player player = event.getPlayer();
 		try {
 			ConcurrentHashMap<String, ChatProfile> profiles = Nova.getInstance().chatData.profiles;
@@ -40,13 +48,17 @@ public class ChatListeners implements Listener {
 			player.sendMessage(NovaMessages.PREFIX_ERROR + "An error occurred while handling your chat message.");
 		}
 	}
-	
-    @EventHandler(priority = EventPriority.LOW)
-    public void onPlayerJoin(PlayerJoinEvent event) {
-        ChatProfile profile = new ChatProfile(event.getPlayer());
-        Nova.getInstance().chatData.profiles.put(profile.getPlayer().getName(), profile);
-    }
-	
+
+	@EventHandler(priority = EventPriority.LOW)
+	public void onPlayerJoin(PlayerJoinEvent event) {
+		ChatProfile profile = new ChatProfile(event.getPlayer());
+		Nova.getInstance().chatData.profiles.put(profile.getPlayer().getName(), profile);
+
+		if (Nova.getInstance().moduleIsEnabled("nametags")) {
+			ServerScoreboard.updateBoard();
+		}
+	}
+
 	@EventHandler(priority = EventPriority.HIGH)
 	public void onPlayerQuit(PlayerQuitEvent event) {
 		Nova.getInstance().chatData.profiles.remove(event.getPlayer().getName());

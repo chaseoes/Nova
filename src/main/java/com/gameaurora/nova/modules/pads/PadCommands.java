@@ -25,6 +25,11 @@ public class PadCommands implements CommandExecutor {
 
 		Player player = (Player) cs;
 		double distance = 0;
+		
+		if (!player.hasPermission("nova.launchpadcommand")) {
+			cs.sendMessage(NovaMessages.NO_PERMISSION);
+			return true;
+		}
 
 		try {
 			distance = Double.valueOf(strings[0]);

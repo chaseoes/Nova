@@ -10,6 +10,10 @@ public class PermissionUtilities {
 
 	private static ZPermissionsService service = Nova.getInstance().getServer().getServicesManager().load(ZPermissionsService.class);
 
+	public static ZPermissionsService getServiceProvider() {
+		return service;
+	}
+
 	public static String getGroupForPlayer(Player player) {
 		return service.getPlayerPrimaryGroup(player.getUniqueId());
 	}
@@ -21,6 +25,23 @@ public class PermissionUtilities {
 		} catch (Exception e) {
 			return ChatColor.RED + getGroupForPlayer(player) + " CHAT ERROR" + "\n" + player.getUniqueId().toString();
 		}
+	}
 
+	public static String getChatPrefix(String group) {
+		try {
+			String prefix = service.getGroupMetadata(group, "prefix", Object.class).toString();
+			return ChatColor.translateAlternateColorCodes('&', prefix.replace("<player>", "%1$s").replace(":", "").replace("<message>", ""));
+		} catch (Exception e) {
+			return ChatColor.RED + "ERROR";
+		}
+	}
+
+	public static String getChatSuffix(String group) {
+		try {
+			String suffix = service.getGroupMetadata(group, "suffix", Object.class).toString();
+			return ChatColor.translateAlternateColorCodes('&', suffix);
+		} catch (Exception e) {
+			return "";
+		}
 	}
 }

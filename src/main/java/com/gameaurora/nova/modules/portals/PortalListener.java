@@ -5,7 +5,7 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 
 import com.gameaurora.nova.events.RegionEnterEvent;
-import com.gameaurora.nova.utilities.GeneralUtilities;
+import com.gameaurora.nova.utilities.BungeeUtilities;
 
 public class PortalListener implements Listener {
 
@@ -13,7 +13,7 @@ public class PortalListener implements Listener {
 	public void onRegionEnter(RegionEnterEvent event) {
 		if (event.getRegionName().startsWith("server-")) {
 			String server = event.getRegionName().replace("server-", "");
-			GeneralUtilities.sendToServer(event.getPlayer(), server);
+			BungeeUtilities.sendToServer(event.getPlayer(), server);
 		}
 	}
 

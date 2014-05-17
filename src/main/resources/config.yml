@@ -16,7 +16,12 @@ modules:
 - menu
 - signlinks
 - punch
-server-name: null
+- trailselector
+- arrowtp
+- nametags
+- superspeed
+server-name: undefined
+pretty-server-name: Undefined
 database:
   hostname: localhost
   port: 3306

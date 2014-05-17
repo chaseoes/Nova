@@ -25,29 +25,32 @@ public class PunchListener implements Listener {
 		Entity attacker = event.getDamager();
 		if(attacker instanceof Player && event.getEntity() instanceof Player) {
 			Player player = (Player) attacker;
-			if (player.hasPermission("nova.launch")) {
-				if (((Player) event.getEntity()).hasPermission("nova.launchable")) {
-					if (!cantUse.contains(player.getName())) {
-						Nova.getInstance().getServer().broadcastMessage(NovaMessages.PREFIX_GENERAL + ChatColor.GREEN + player.getName() + ChatColor.GRAY + " punched " + ChatColor.GREEN + ((Player) event.getEntity()).getName() + ChatColor.GRAY + " into the air!");
-						for (Player onlinePlayer : Nova.getInstance().getServer().getOnlinePlayers()) {
-							onlinePlayer.playSound(event.getEntity().getLocation(), Sound.EXPLODE, 1, 1);
-						}
-
-						event.getEntity().setVelocity(new Vector(event.getEntity().getVelocity().getX(), 7.0D, event.getEntity().getVelocity().getZ()));
-
-						final String playerName = player.getName();
-						cantUse.add(playerName);
-
-						Nova.getInstance().getServer().getScheduler().runTaskLater(Nova.getInstance(), new Runnable() {
-							public void run() {
-								cantUse.remove(playerName);
-
+			if (player.getLocation().getWorld().getName().equals("lobby")) {
+				if (player.hasPermission("nova.launch")) {
+					if (((Player) event.getEntity()).hasPermission("nova.launchable")) {
+						if (!cantUse.contains(player.getName())) {
+							Nova.getInstance().getServer().broadcastMessage(NovaMessages.PREFIX_GENERAL + ChatColor.GREEN + player.getName() + ChatColor.GRAY + " punched " + ChatColor.GREEN + ((Player) event.getEntity()).getName() + ChatColor.GRAY + " into the air!");
+							for (Player onlinePlayer : Nova.getInstance().getServer().getOnlinePlayers()) {
+								onlinePlayer.playSound(event.getEntity().getLocation(), Sound.EXPLODE, 1, 1);
 							}
-						}, 6000L);
-					} else {
-						player.sendMessage(NovaMessages.PREFIX_ERROR + "You must wait 5 minutes before using that again!");
+
+							event.getEntity().setVelocity(new Vector(event.getEntity().getVelocity().getX(), 7.0D, event.getEntity().getVelocity().getZ()));
+
+							final String playerName = player.getName();
+							cantUse.add(playerName);
+
+							Nova.getInstance().getServer().getScheduler().runTaskLater(Nova.getInstance(), new Runnable() {
+								public void run() {
+									cantUse.remove(playerName);
+
+								}
+							}, 6000L);
+						} else {
+							player.sendMessage(NovaMessages.PREFIX_ERROR + "You must wait 5 minutes before using that again!");
+						}
 					}
 				}
+				event.setCancelled(true);
 			}
 		}
 	}

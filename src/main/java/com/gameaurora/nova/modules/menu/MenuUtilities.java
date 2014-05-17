@@ -9,7 +9,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.Material;
 
 import com.gameaurora.nova.Nova;
-import com.gameaurora.nova.utilities.GeneralUtilities;
+import com.gameaurora.nova.utilities.BungeeUtilities;
 import com.gameaurora.nova.modules.menu.IconMenu;
 
 public class MenuUtilities {
@@ -20,7 +20,7 @@ public class MenuUtilities {
 
 	public static void loadIcons() {
 		icons.clear();
-		
+
 		ItemStack i = new ItemStack(Material.INK_SACK, 1);
 		icons.put("Hub", new ItemStack(Material.SLIME_BALL, 1));
 		descriptions.put("Hub", "Our amazing server hub.");
@@ -39,27 +39,27 @@ public class MenuUtilities {
 		i.setDurability((short) 8);
 		icons.put("Skyblock", i);
 		descriptions.put("Skyblock", "Island survival with limited resources!");
-		
+
 		i = new ItemStack(Material.INK_SACK, 1);
 		i.setDurability((short) 9);
 		icons.put("Spleef", i);
 		descriptions.put("Spleef", "Classic spleef, knock out other players!");
-		
+
 		i = new ItemStack(Material.INK_SACK, 1);
 		i.setDurability((short) 10);
 		icons.put("Bow Spleef", i);
 		descriptions.put("Bow Spleef", "Spleef with a twist, use a bow!");
-		
+
 		i = new ItemStack(Material.INK_SACK, 1);
 		i.setDurability((short) 12);
 		icons.put("TNT Run", i);
 		descriptions.put("TNT Run", "Run around without falling!");
-		
+
 		i = new ItemStack(Material.INK_SACK, 1);
 		i.setDurability((short) 13);
 		icons.put("Deadly Drop", i);
 		descriptions.put("Deadly Drop", "Get to the bottom first without dying!");
-		
+
 		i = new ItemStack(Material.INK_SACK, 1);
 		i.setDurability((short) 14);
 		icons.put("TF2", i);
@@ -71,7 +71,7 @@ public class MenuUtilities {
 		menu = new IconMenu(ChatColor.DARK_GRAY + "Server Menu", 9, new IconMenu.OptionClickEventHandler() {
 			@Override
 			public void onOptionClick(IconMenu.OptionClickEvent event) {
-				GeneralUtilities.sendToServer(event.getPlayer(), ChatColor.stripColor(event.getName()).toLowerCase().replace(" ", ""));
+				BungeeUtilities.sendToServer(event.getPlayer(), ChatColor.stripColor(event.getName()).toLowerCase().replace(" ", ""));
 				event.setWillClose(true);
 				event.setWillDestroy(true);
 			}
@@ -104,7 +104,13 @@ public class MenuUtilities {
 			}
 
 			description[p] = " ";
-			description[p + 1] = ChatColor.YELLOW + "Players Online: " + ChatColor.AQUA + GeneralUtilities.getPlayerCount(server);
+			int playerCount = PlayerCountUtilities.getPlayerCount(server);
+			String playerCountMessage = ChatColor.AQUA + "" + playerCount;
+			if (playerCount == -1) {
+				playerCountMessage = ChatColor.RED + "Server Offline";
+			}
+
+			description[p + 1] = ChatColor.YELLOW + "Players Online: " + playerCountMessage;
 			menu.setOption(i - 1, icons.get(server), ChatColor.GREEN + server, description);
 		}
 		menu.reload();
