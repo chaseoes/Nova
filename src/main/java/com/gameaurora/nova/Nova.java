@@ -152,7 +152,6 @@ public class Nova extends JavaPlugin implements PluginMessageListener {
 		DataInputStream in = new DataInputStream(new ByteArrayInputStream(message));
 		try {
 			String subchannel = in.readUTF();
-			System.out.print(subchannel);
 			if (subchannel.equals("PlayerCount")) {
 				try {
 					String server = in.readUTF();
