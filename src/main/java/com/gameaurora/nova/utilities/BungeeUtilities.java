@@ -30,11 +30,11 @@ public class BungeeUtilities {
 		DataOutputStream msgout = new DataOutputStream(msgbytes);
 
 		try {
-			msgout.writeUTF(currentServerName + Nova.CHANNEL_SEPARATOR);
+			msgout.writeUTF(currentServerName);
 			System.out.print(currentServerName);
-			msgout.writeUTF(playerName + Nova.CHANNEL_SEPARATOR);
+			msgout.writeUTF(playerName);
 			System.out.print(playerName);
-			msgout.writeUTF(chatFormat + Nova.CHANNEL_SEPARATOR);
+			msgout.writeUTF(chatFormat);
 			System.out.print(chatFormat);
 			msgout.writeUTF(chatMessage);
 			System.out.print(chatMessage);

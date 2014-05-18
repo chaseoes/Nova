@@ -36,6 +36,10 @@ public class MenuListeners implements Listener {
 					if (ChatColor.stripColor(event.getItem().getItemMeta().getDisplayName()).equals("Trail Selector")) {
 						event.getPlayer().performCommand("trail");
 					} else if (ChatColor.stripColor(event.getItem().getItemMeta().getDisplayName()).equals("Server Menu")) {						
+						for (String server : MenuUtilities.icons.keySet()) {
+							PlayerCountUtilities.requestPlayerCount(server);
+						}
+						
 						MenuUtilities.destroyCache(event.getPlayer());
 						MenuUtilities.open(event.getPlayer());
 					}

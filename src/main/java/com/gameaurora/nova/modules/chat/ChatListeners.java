@@ -21,7 +21,7 @@ public class ChatListeners implements Listener {
 	public void onAsyncChat(final AsyncPlayerChatEvent event) {
 		Nova.getInstance().getServer().getScheduler().runTask(Nova.getInstance(), new Runnable() {
 			public void run() {
-				BungeeUtilities.forwardChatMessage("ALL", Nova.getInstance().getConfig().getString("pretty-server-name"), event.getPlayer().getName(), event.getFormat(), event.getMessage());
+				// BungeeUtilities.forwardChatMessage("ALL", Nova.getInstance().getConfig().getString("pretty-server-name"), event.getPlayer().getName(), event.getFormat(), event.getMessage());
 			}
 		});
 

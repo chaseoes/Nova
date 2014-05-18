@@ -154,26 +154,32 @@ public class Nova extends JavaPlugin implements PluginMessageListener {
 			String subchannel = in.readUTF();
 			System.out.print(subchannel);
 			if (subchannel.equals("PlayerCount")) {
-				String server = in.readUTF();
-				int playerCount = in.readInt();
-				PlayerCountUtilities.setPlayerCount(server, playerCount);
+				try {
+					String server = in.readUTF();
+					int playerCount = in.readInt();
+					PlayerCountUtilities.setPlayerCount(server, playerCount);
+				} catch (Exception e) {
+
+				}
 				return;
 			}
 
 			if (subchannel.equals("NovaChatMessage")) {
-				String[] splitMessage = in.readUTF().split(CHANNEL_SEPARATOR);
-				String serverName = splitMessage[0];
-				System.out.print(serverName);
-				String playerName = splitMessage[1];
-				System.out.print(playerName);
-				String chatFormat = splitMessage[2];
-				System.out.print(chatFormat);
-				String chatMessage = splitMessage[3];
-				System.out.print(chatMessage);
+				short len = in.readShort();
+				byte[] msgbytes = new byte[len];
+				in.readFully(msgbytes);
+				DataInputStream msgin = new DataInputStream(new ByteArrayInputStream(msgbytes));
+
+				String serverName = msgin.readUTF();
+				String playerName = msgin.readUTF();
+				String chatFormat = msgin.readUTF();
+				String chatMessage = msgin.readUTF();
+
 				String finalMessage = String.format(chatFormat, playerName, chatMessage);
 				FancyMessage fancyMessage = new FancyMessage(finalMessage).tooltip(ChatColor.GREEN + "Current Server: " + ChatColor.AQUA + serverName);
 
 				for (Player onlinePlayer : getServer().getOnlinePlayers()) {
+					onlinePlayer.sendMessage(fancyMessage.toJSONString());
 					fancyMessage.send(onlinePlayer);
 				}
 				return;
