@@ -35,7 +35,7 @@ public class TeleportCommand implements CommandExecutor {
 			if (Nova.getInstance().getServer().getPlayer(strings[0]) != null) {
 				if (!cs.hasPermission("nova.tpbypass")) {
 					if (teleportTo.hasMetadata("nova.tp.disabled")) {
-						cs.sendMessage(NovaMessages.PREFIX_ERROR + strings[0] + " has teleport requests turned off.");
+						cs.sendMessage(NovaMessages.PREFIX_ERROR + teleportTo.getName() + " has teleport requests turned off.");
 						return true;
 					}
 

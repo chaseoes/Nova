@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Sound;
+import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -23,6 +24,11 @@ public class PunchListener implements Listener {
 	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = false)
 	public void onPlayerHitEvent(EntityDamageByEntityEvent event) {
 		Entity attacker = event.getDamager();
+		if (event.getEntity().getWorld().getName().equals("lobby") && attacker instanceof Arrow) {
+			attacker.remove();
+			event.setCancelled(true);
+		}
+		
 		if(attacker instanceof Player && event.getEntity() instanceof Player) {
 			Player player = (Player) attacker;
 			if (player.getLocation().getWorld().getName().equals("lobby")) {

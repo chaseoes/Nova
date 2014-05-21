@@ -5,6 +5,8 @@ import java.util.List;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
+import org.bukkit.block.Block;
+import org.bukkit.block.Sign;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -26,11 +28,23 @@ public class MenuListeners implements Listener {
 
 	@EventHandler(priority = EventPriority.LOWEST)
 	public void onPlayerInteract(PlayerInteractEvent event) {
-		if ((event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK || event.getAction() == Action.LEFT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK) && (event.getPlayer().getItemInHand().getType() == Material.COMPASS || event.getPlayer().getItemInHand().getType() == Material.REDSTONE)) {
-			if (event.hasBlock() && (event.getClickedBlock().getType() == Material.WALL_SIGN || event.getClickedBlock().getType() == Material.SIGN || event.getClickedBlock().getType() == Material.JUKEBOX || event.getClickedBlock().getState() instanceof InventoryHolder)) {
-				return;
-			}
+		if (event.hasBlock() && (event.getClickedBlock().getType() == Material.WALL_SIGN || event.getClickedBlock().getType() == Material.SIGN || event.getClickedBlock().getType() == Material.JUKEBOX || event.getClickedBlock().getState() instanceof InventoryHolder)) {
+			Block b = event.getClickedBlock();
+			if (b.getState() instanceof Sign) {
+				Sign sign = (Sign) b.getState();
+				if (ChatColor.stripColor(sign.getLine(0)).equalsIgnoreCase("[Server Menu]")) {
+					for (String server : MenuUtilities.icons.keySet()) {
+						PlayerCountUtilities.requestPlayerCount(server);
+					}
 
+					MenuUtilities.destroyCache(event.getPlayer());
+					MenuUtilities.open(event.getPlayer());
+				}
+			}
+			return;
+		}
+
+		if ((event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK || event.getAction() == Action.LEFT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK) && (event.getPlayer().getItemInHand().getType() == Material.COMPASS || event.getPlayer().getItemInHand().getType() == Material.REDSTONE)) {
 			if (event.getItem().hasItemMeta()) {
 				if (event.getItem().getItemMeta().hasDisplayName()) {
 					if (ChatColor.stripColor(event.getItem().getItemMeta().getDisplayName()).equals("Trail Selector")) {
@@ -39,7 +53,7 @@ public class MenuListeners implements Listener {
 						for (String server : MenuUtilities.icons.keySet()) {
 							PlayerCountUtilities.requestPlayerCount(server);
 						}
-						
+
 						MenuUtilities.destroyCache(event.getPlayer());
 						MenuUtilities.open(event.getPlayer());
 					}
@@ -92,7 +106,10 @@ public class MenuListeners implements Listener {
 		lore.add(ChatColor.GRAY + "Right click to open.");
 		im.setLore(lore);
 		i.setItemMeta(im);
-		event.getPlayer().getInventory().addItem(i);
+
+		if (Nova.getInstance().moduleIsEnabled("menuitem")) {
+			event.getPlayer().getInventory().addItem(i);
+		}
 
 		if (Nova.getInstance().moduleIsEnabled("trailselector")) {
 			i = new ItemStack(Material.REDSTONE, 1);

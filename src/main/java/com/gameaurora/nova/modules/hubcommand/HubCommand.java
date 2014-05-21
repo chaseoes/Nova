@@ -8,6 +8,7 @@ import org.bukkit.entity.Player;
 import com.gameaurora.nova.Nova;
 import com.gameaurora.nova.NovaMessages;
 import com.gameaurora.nova.utilities.BungeeUtilities;
+import com.gameaurora.nova.utilities.GeneralUtilities;
 
 public class HubCommand implements CommandExecutor {
 
@@ -17,11 +18,20 @@ public class HubCommand implements CommandExecutor {
 			return true;
 		}
 
-		Player player = (Player) cs;
-		if (strings.length > 0) {
+		final Player player = (Player) cs;
+		if (strings != null && strings.length > 0) {
 			if (strings[0].equalsIgnoreCase("-o")) {
 				player.teleport(Nova.LOBBY_LOCATION);
 			}
+			return true;
+		}
+
+		if (GeneralUtilities.getServerName().equals("survival") && !string.equals("hub")) {
+			Nova.getInstance().getServer().getScheduler().runTaskLater(Nova.getInstance(), new Runnable() {
+				public void run() {
+					player.performCommand("mvspawn");
+				}
+			}, 10L);
 			return true;
 		}
 

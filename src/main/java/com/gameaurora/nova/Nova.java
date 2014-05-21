@@ -16,6 +16,7 @@ import com.gameaurora.nova.modules.chat.ChatListeners;
 import com.gameaurora.nova.modules.hidestream.HideStreamListener;
 import com.gameaurora.nova.modules.hubcommand.HubCommand;
 import com.gameaurora.nova.modules.joinspawn.JoinSpawnListener;
+import com.gameaurora.nova.modules.kick.KickCommand;
 import com.gameaurora.nova.modules.logger.LogListener;
 import com.gameaurora.nova.modules.menu.MenuListeners;
 import com.gameaurora.nova.modules.menu.MenuUtilities;
@@ -124,21 +125,14 @@ public class Nova extends JavaPlugin implements PluginMessageListener {
 	}
 
 	public boolean onCommand(CommandSender cs, Command cmnd, String string, String[] strings) {
-		if (strings.length == 0) {
-			cs.sendMessage(NovaMessages.PREFIX_GENERAL + getDescription().getName() + " version " + getDescription().getVersion() + " by chaseoes.");
-			cs.sendMessage(NovaMessages.PREFIX_GENERAL + "http://emeraldsmc.com");
-			return true;
-		}
-
-		if (strings[0].equalsIgnoreCase("reload")) {
-			if (cs.hasPermission("nova.reload")) {
-				reloadConfig();
-				saveConfig();
-				loadModules();
-				cs.sendMessage(NovaMessages.PREFIX_GENERAL + "Successfully reloaded configuration and modules.");
-			} else {
-				cs.sendMessage(NovaMessages.NO_PERMISSION);
+		if (string.equalsIgnoreCase(getDescription().getName().toLowerCase())) {
+			if (strings.length == 0) {
+				cs.sendMessage(NovaMessages.PREFIX_GENERAL + getDescription().getName() + " version " + ChatColor.GREEN + getDescription().getVersion() + ChatColor.GRAY + " by chaseoes.");
+				cs.sendMessage(NovaMessages.PREFIX_GENERAL + "http://gameaurora.com");
+				return true;
 			}
+		} else {
+			cs.sendMessage(NovaMessages.PREFIX_ERROR + "That feature isn't enabled on this server.");
 		}
 		return true;
 	}
@@ -290,6 +284,10 @@ public class Nova extends JavaPlugin implements PluginMessageListener {
 
 		if (moduleIsEnabled("superspeed")) {
 			pm.registerEvents(new SuperSpeedListener(), this);
+		}
+
+		if (moduleIsEnabled("kick")) {
+			getCommand("kick").setExecutor(new KickCommand());
 		}
 	}
 

@@ -16,6 +16,14 @@ import com.gameaurora.nova.Nova;
 
 public class GeneralUtilities {
 
+	public static String getServerName() {
+		String name = Nova.getInstance().getConfig().getString("server-name");
+		if (name != null) {
+			return name;
+		}
+		return "unknown";
+	}
+
 	public static String getPrettyServerName() {
 		String prettyName = Nova.getInstance().getConfig().getString("pretty-server-name");
 		if (prettyName != null) {

@@ -18,7 +18,7 @@ import com.gameaurora.nova.NovaMessages;
 public class ArrowTeleportListeners implements Listener {
 
 	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
-	public void onProjectileHit(ProjectileHitEvent event) { // TODO: EntityShootBowEvent permission check.
+	public void onProjectileHit(ProjectileHitEvent event) {
 		Entity entity = event.getEntity();
 		if (entity instanceof Arrow) {
 			Arrow arrow = (Arrow) entity;
@@ -29,10 +29,11 @@ public class ArrowTeleportListeners implements Listener {
 					player.teleport(new Location(arrow.getWorld(), arrow.getLocation().getX(), arrow.getLocation().getY(), arrow.getLocation().getZ(), player.getLocation().getYaw(), player.getLocation().getPitch()));
 					player.playSound(arrow.getLocation(), Sound.ENDERMAN_TELEPORT, 1, 1);
 					player.getInventory().getItemInHand().setDurability((short) 0);
+					arrow.remove();
 
 					int i = 0;
-					while (i < 100) {
-						arrow.getLocation().getWorld().playEffect(arrow.getLocation(), Effect.SMOKE, 0, 5);
+					while (i < 50) {
+						arrow.getLocation().getWorld().playEffect(arrow.getLocation(), Effect.MOBSPAWNER_FLAMES, 0, 6);
 						i++;
 					}
 				} else {

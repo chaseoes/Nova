@@ -13,7 +13,6 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import com.gameaurora.nova.Nova;
 import com.gameaurora.nova.NovaMessages;
 import com.gameaurora.nova.modules.nametags.ServerScoreboard;
-import com.gameaurora.nova.utilities.BungeeUtilities;
 
 public class ChatListeners implements Listener {
 

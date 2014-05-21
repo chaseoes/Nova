@@ -51,3 +51,6 @@ commands:
   lp:
     description: Launch pads!
     usage: /<command> [args]
+  kick:
+    description: Kick command.
+    usage: /<command> [args]

@@ -14,12 +14,14 @@ modules:
 - bans
 - loghoppers
 - menu
+- menuitem
 - signlinks
 - punch
 - trailselector
 - arrowtp
 - nametags
 - superspeed
+- kick
 server-name: undefined
 pretty-server-name: Undefined
 database:
