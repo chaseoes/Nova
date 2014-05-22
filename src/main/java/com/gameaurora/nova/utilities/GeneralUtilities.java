@@ -1,16 +1,21 @@
 package com.gameaurora.nova.utilities;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Random;
 import java.util.Set;
 
 import org.bukkit.Color;
 import org.bukkit.FireworkEffect;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Firework;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.FireworkMeta;
+import org.bukkit.inventory.meta.ItemMeta;
 
 import com.gameaurora.nova.Nova;
 
@@ -51,6 +56,21 @@ public class GeneralUtilities {
 		builder.withColor(colors);
 		meta.addEffect(builder.build());
 		fw.setFireworkMeta(meta);
+	}
+
+	public static ItemStack getCustomItem(Material material, String name, String... lores) {
+		ItemStack i = new ItemStack(material, 1);
+		ItemMeta im = i.getItemMeta();
+		im.setDisplayName(name);
+
+		List<String> lore = new ArrayList<String>();
+		for (String l : lores) {
+			lore.add(l);
+		}
+
+		im.setLore(lore);
+		i.setItemMeta(im);
+		return i;
 	}
 
 	public static void clearInventory(Player player) {

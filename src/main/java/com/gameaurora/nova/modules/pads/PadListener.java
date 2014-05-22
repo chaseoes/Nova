@@ -23,11 +23,13 @@ public class PadListener implements Listener {
 		Block plate = playerLoc.getWorld().getBlockAt(playerLoc);
 		if (plate.getType() == Material.WOOD_PLATE || plate.getType() == Material.STONE_PLATE || plate.getType() == Material.GOLD_PLATE || plate.getType() == Material.IRON_PLATE) {
 			double distance = PadUtilities.getLaunchDistance(plate.getLocation());
-			player.setVelocity(player.getLocation().getDirection().multiply(distance));
-			player.setVelocity(new Vector(player.getVelocity().getX(), 1.0D, player.getVelocity().getZ()));
-			player.playSound(player.getLocation(), Sound.BAT_TAKEOFF, 1.0F, 1.0F);
-			for (Player all : Nova.getInstance().getServer().getOnlinePlayers()) {
-				all.playEffect(player.getLocation(), Effect.ENDER_SIGNAL, null);
+			if (distance != 0) {
+				player.setVelocity(player.getLocation().getDirection().multiply(distance));
+				player.setVelocity(new Vector(player.getVelocity().getX(), 1.0D, player.getVelocity().getZ()));
+				player.playSound(player.getLocation(), Sound.BAT_TAKEOFF, 1.0F, 1.0F);
+				for (Player all : Nova.getInstance().getServer().getOnlinePlayers()) {
+					all.playEffect(player.getLocation(), Effect.ENDER_SIGNAL, null);
+				}
 			}
 		}
 	}

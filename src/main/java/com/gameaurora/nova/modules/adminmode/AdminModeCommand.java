@@ -53,10 +53,9 @@ public class AdminModeCommand implements CommandExecutor {
     	player.getInventory().setItem(2, getAdminItem(Material.WOOD_AXE, "Admin Wand"));
     	player.getInventory().setItem(3, getAdminItem(Material.LEATHER, "Admin Region Tool"));
     	player.getInventory().setItem(4, getAdminItem(Material.INK_SACK, "Admin Resource Pack Changer"));
-        player.getInventory().setItem(5, getAdminItem(Material.BEDROCK, "Admin Bedrock"));
-        player.getInventory().setItem(6, getAdminItem(Material.COMPASS, "Admin Compass"));
-        player.getInventory().setItem(7, getAdminItem(Material.WATCH, "Admin Clock"));
-        player.getInventory().setItem(8, getAdminItem(Material.WOOD_HOE, "Admin Welcomer"));
+        player.getInventory().setItem(5, getAdminItem(Material.COMPASS, "Admin Compass"));
+        player.getInventory().setItem(6, getAdminItem(Material.WATCH, "Admin Clock"));
+        player.getInventory().setItem(7, getAdminItem(Material.WOOD_HOE, "Admin Welcomer"));
         
         player.getInventory().setHelmet(getAdminItem(Material.LEATHER_HELMET, "Admin Helmet"));
         player.getInventory().setChestplate(getAdminItem(Material.LEATHER_CHESTPLATE, "Admin Chestplate"));

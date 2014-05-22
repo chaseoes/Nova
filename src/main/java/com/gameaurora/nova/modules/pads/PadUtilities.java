@@ -23,11 +23,13 @@ public class PadUtilities {
 	}
 
 	public static double getLaunchDistance(Location location) {
-		for (String dist : Nova.getInstance().getConfig().getConfigurationSection("launch-pads").getKeys(false)) {
-			double distance = Double.valueOf(dist.replace("-", "."));
-			List<String> launchPadLocations = Nova.getInstance().getConfig().getStringList("launch-pads." + String.valueOf(distance).replace(".", "-"));
-			if (launchPadLocations.contains(SerializableLocation.locationToString(location))) {
-				return distance;
+		if (Nova.getInstance().getConfig().getConfigurationSection("launch-pads") != null) {
+			for (String dist : Nova.getInstance().getConfig().getConfigurationSection("launch-pads").getKeys(false)) {
+				double distance = Double.valueOf(dist.replace("-", "."));
+				List<String> launchPadLocations = Nova.getInstance().getConfig().getStringList("launch-pads." + String.valueOf(distance).replace(".", "-"));
+				if (launchPadLocations.contains(SerializableLocation.locationToString(location))) {
+					return distance;
+				}
 			}
 		}
 		return 0;
@@ -46,8 +48,6 @@ public class PadUtilities {
 			Nova.getInstance().getConfig().set("launch-pads." + String.valueOf(distance).replace(".", "-"), locations);
 			Nova.getInstance().saveConfig();
 		}
-
-
 	}
 
 }

@@ -11,6 +11,8 @@ import com.gameaurora.nova.modules.adminmode.AdminModeCommand;
 import com.gameaurora.nova.modules.adminmode.AdminModeListeners;
 import com.gameaurora.nova.modules.adminmode.AdminModeTask;
 import com.gameaurora.nova.modules.arrowtp.ArrowTeleportListeners;
+import com.gameaurora.nova.modules.blockcommands.BlockCommandsCommands;
+import com.gameaurora.nova.modules.blockcommands.BlockCommandsListeners;
 import com.gameaurora.nova.modules.chat.ChatData;
 import com.gameaurora.nova.modules.chat.ChatListeners;
 import com.gameaurora.nova.modules.hidestream.HideStreamListener;
@@ -18,13 +20,16 @@ import com.gameaurora.nova.modules.hubcommand.HubCommand;
 import com.gameaurora.nova.modules.joinspawn.JoinSpawnListener;
 import com.gameaurora.nova.modules.kick.KickCommand;
 import com.gameaurora.nova.modules.logger.LogListener;
+import com.gameaurora.nova.modules.maintenancemode.MaintenanceModeTask;
 import com.gameaurora.nova.modules.menu.MenuListeners;
 import com.gameaurora.nova.modules.menu.MenuUtilities;
 import com.gameaurora.nova.modules.menu.PlayerCountUtilities;
+import com.gameaurora.nova.modules.menu.ServerMenuCommand;
 import com.gameaurora.nova.modules.nametags.ServerScoreboard;
 import com.gameaurora.nova.modules.onlyproxyjoin.OnlyProxyJoinListener;
 import com.gameaurora.nova.modules.pads.PadCommands;
 import com.gameaurora.nova.modules.pads.PadListener;
+import com.gameaurora.nova.modules.pingchat.PingChatListener;
 import com.gameaurora.nova.modules.portals.PortalListener;
 import com.gameaurora.nova.modules.punch.PunchListener;
 import com.gameaurora.nova.modules.signcolors.SignColorListener;
@@ -34,6 +39,7 @@ import com.gameaurora.nova.modules.teleport.TeleportCommand;
 import com.gameaurora.nova.modules.teleport.TeleportData;
 import com.gameaurora.nova.utilities.PlayerStateStorage;
 import com.gameaurora.nova.utilities.SQLUtilities;
+import com.gameaurora.nova.utilities.SerializableLocation;
 
 import mkremins.fanciful.FancyMessage;
 
@@ -131,6 +137,25 @@ public class Nova extends JavaPlugin implements PluginMessageListener {
 				cs.sendMessage(NovaMessages.PREFIX_GENERAL + "http://gameaurora.com");
 				return true;
 			}
+
+			if (strings[0].equalsIgnoreCase("getpos")) {
+				if (cs.hasPermission("nova.getpos")) {
+					if (cs instanceof Player) {
+						Location location = ((Player) cs).getLocation();
+						cs.sendMessage(NovaMessages.PREFIX_GENERAL + "Your current location information:");
+						cs.sendMessage(ChatColor.GRAY + "X: " + ChatColor.GREEN + location.getBlockX());
+						cs.sendMessage(ChatColor.GRAY + "Y: " + ChatColor.GREEN + location.getBlockY());
+						cs.sendMessage(ChatColor.GRAY + "Z: " + ChatColor.GREEN + location.getBlockZ());
+						cs.sendMessage(ChatColor.GRAY + "Yaw: " + ChatColor.GREEN + location.getYaw());
+						cs.sendMessage(ChatColor.GRAY + "Pitch: " + ChatColor.GREEN + location.getPitch());
+						cs.sendMessage(ChatColor.GRAY + "Location String: " + ChatColor.GREEN + SerializableLocation.locationToString(location));
+					} else {
+						cs.sendMessage(NovaMessages.MUST_BE_PLAYER);
+					}
+				} else {
+					cs.sendMessage(NovaMessages.NO_PERMISSION);
+				}
+			}
 		} else {
 			cs.sendMessage(NovaMessages.PREFIX_ERROR + "That feature isn't enabled on this server.");
 		}
@@ -157,7 +182,7 @@ public class Nova extends JavaPlugin implements PluginMessageListener {
 				return;
 			}
 
-			if (subchannel.equals("NovaChatMessage")) {
+			if (subchannel.equals("NovaChatMessageDISABLED")) {
 				short len = in.readShort();
 				byte[] msgbytes = new byte[len];
 				in.readFully(msgbytes);
@@ -262,6 +287,7 @@ public class Nova extends JavaPlugin implements PluginMessageListener {
 		if (moduleIsEnabled("menu")) {
 			MenuUtilities.loadIcons();
 			pm.registerEvents(new MenuListeners(), this);
+			getCommand("s").setExecutor(new ServerMenuCommand());
 		}
 
 		if (moduleIsEnabled("signlinks")) {
@@ -288,6 +314,19 @@ public class Nova extends JavaPlugin implements PluginMessageListener {
 
 		if (moduleIsEnabled("kick")) {
 			getCommand("kick").setExecutor(new KickCommand());
+		}
+
+		if (moduleIsEnabled("blockcommands")) {
+			getCommand("bc").setExecutor(new BlockCommandsCommands());
+			pm.registerEvents(new BlockCommandsListeners(), this);
+		}
+
+		if (moduleIsEnabled("maintenancemode")) {
+			getServer().getScheduler().runTaskTimer(this, new MaintenanceModeTask(), 0L, 3600L);
+		}
+
+		if (moduleIsEnabled("pingchat")) {
+			pm.registerEvents(new PingChatListener(), this);
 		}
 	}
 

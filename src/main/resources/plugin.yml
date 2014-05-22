@@ -54,3 +54,9 @@ commands:
   kick:
     description: Kick command.
     usage: /<command> [args]
+  bc:
+    description: Block commands!
+    usage: /<command> [args]
+  s:
+    description: Server menu!
+    usage: /<command> [args]

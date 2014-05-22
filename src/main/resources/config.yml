@@ -22,6 +22,9 @@ modules:
 - nametags
 - superspeed
 - kick
+- blockcommands
+- maintenancemode
+- pingchat
 server-name: undefined
 pretty-server-name: Undefined
 database:
