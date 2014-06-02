@@ -1,5 +1,17 @@
 package com.gameaurora.nova;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+
+import org.bukkit.ChatColor;
+import org.bukkit.Location;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
+import org.bukkit.plugin.PluginManager;
+import org.bukkit.plugin.java.JavaPlugin;
+
 import com.gameaurora.modules.autosave.AutosaveTask;
 import com.gameaurora.modules.bans.BanCommand;
 import com.gameaurora.modules.bans.BanUtilities;
@@ -10,11 +22,17 @@ import com.gameaurora.nova.events.listeners.RegionEventListeners;
 import com.gameaurora.nova.modules.adminmode.AdminModeCommand;
 import com.gameaurora.nova.modules.adminmode.AdminModeListeners;
 import com.gameaurora.nova.modules.adminmode.AdminModeTask;
+import com.gameaurora.nova.modules.announcer.AnnouncerTask;
 import com.gameaurora.nova.modules.arrowtp.ArrowTeleportListeners;
 import com.gameaurora.nova.modules.blockcommands.BlockCommandsCommands;
 import com.gameaurora.nova.modules.blockcommands.BlockCommandsListeners;
 import com.gameaurora.nova.modules.chat.ChatData;
 import com.gameaurora.nova.modules.chat.ChatListeners;
+import com.gameaurora.nova.modules.cloudmessages.CloudMessage;
+import com.gameaurora.nova.modules.cloudmessages.CloudMessageListeners;
+import com.gameaurora.nova.modules.cloudmessages.CloudMessageReceiveListener;
+import com.gameaurora.nova.modules.cloudmessages.CloudMessageType;
+import com.gameaurora.nova.modules.commandshortcuts.CommandShortcutListener;
 import com.gameaurora.nova.modules.hidestream.HideStreamListener;
 import com.gameaurora.nova.modules.hubcommand.HubCommand;
 import com.gameaurora.nova.modules.joinspawn.JoinSpawnListener;
@@ -37,305 +55,286 @@ import com.gameaurora.nova.modules.signlinks.SignLinkListener;
 import com.gameaurora.nova.modules.superspeed.SuperSpeedListener;
 import com.gameaurora.nova.modules.teleport.TeleportCommand;
 import com.gameaurora.nova.modules.teleport.TeleportData;
+import com.gameaurora.nova.modules.tokens.TokenCommands;
+import com.gameaurora.nova.modules.tokens.TokenData;
+import com.gameaurora.nova.modules.tokens.TokenDataFile;
+import com.gameaurora.nova.modules.tokens.TokenListeners;
+import com.gameaurora.nova.utilities.GeneralUtilities;
 import com.gameaurora.nova.utilities.PlayerStateStorage;
 import com.gameaurora.nova.utilities.SQLUtilities;
 import com.gameaurora.nova.utilities.SerializableLocation;
+import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
 
-import mkremins.fanciful.FancyMessage;
+public class Nova extends JavaPlugin {
 
-import org.bukkit.ChatColor;
-import org.bukkit.Location;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
-import org.bukkit.plugin.PluginManager;
-import org.bukkit.plugin.java.JavaPlugin;
-import org.bukkit.plugin.messaging.PluginMessageListener;
+    private static Nova instance;
+    public List<String> adminPlayers = new ArrayList<String>();
+    public HashMap<String, PlayerStateStorage> adminPlayerStates = new HashMap<String, PlayerStateStorage>();
+    public TeleportData teleportData;
+    public ChatData chatData;
+    private SQLUtilities sql;
+    public static Location LOBBY_LOCATION;
+    public static final String CHANNEL_SEPARATOR = "AABBCCDDEEZ";
+    private WorldGuardPlugin worldGuard;
 
-import java.io.ByteArrayInputStream;
-import java.io.DataInputStream;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+    public static Nova getInstance() {
+        return instance;
+    }
 
-public class Nova extends JavaPlugin implements PluginMessageListener {
+    public void onEnable() {
+        instance = this;
+        getConfig().options().copyDefaults(true);
+        saveConfig();
+        teleportData = new TeleportData();
+        chatData = new ChatData();
 
-	private static Nova instance;
-	public List<String> adminPlayers = new ArrayList<String>();
-	public HashMap<String, PlayerStateStorage> adminPlayerStates = new HashMap<String, PlayerStateStorage>();
-	public TeleportData teleportData;
-	public ChatData chatData;
-	private SQLUtilities sql;
-	public static Location LOBBY_LOCATION;
-	public static final String CHANNEL_SEPARATOR = "AABBCCDDEEZ";
+        if (moduleIsEnabled("bans")) {
+            sql = new SQLUtilities(this);
+        }
 
-	public static Nova getInstance() {
-		return instance;
-	}
+        getServer().getScheduler().runTaskLater(this, new Runnable() {
+            public void run() {
+                worldGuard = (WorldGuardPlugin) getServer().getPluginManager().getPlugin("WorldGuard");
+            }
+        }, 60L);
 
-	public void onEnable() {
-		instance = this;
-		getConfig().options().copyDefaults(true);
-		saveConfig();
-		teleportData = new TeleportData();
-		chatData = new ChatData();
+        getServer().getPluginManager().registerEvents(new RegionEventListeners(), this);
+        getServer().getPluginManager().registerEvents(new CloudMessageListeners(), this);
+        getServer().getMessenger().registerOutgoingPluginChannel(this, "BungeeCord");
+        getServer().getMessenger().registerIncomingPluginChannel(this, "BungeeCord", new CloudMessageReceiveListener());
+        loadModules();
 
-		if (moduleIsEnabled("bans")) {
-			sql = new SQLUtilities(this);
-		}
+        loadLobbyLocation();
 
-		loadModules();
-		getServer().getPluginManager().registerEvents(new RegionEventListeners(), this);
-		getServer().getMessenger().registerOutgoingPluginChannel(this, "BungeeCord");
-		getServer().getMessenger().registerIncomingPluginChannel(this, "BungeeCord", this);
+        for (String server : MenuUtilities.icons.keySet()) {
+            PlayerCountUtilities.requestPlayerCount(server);
+        }
+    }
 
-		loadLobbyLocation();
+    public void onReload() {
+        for (String s : adminPlayers) {
+            Player player = getServer().getPlayerExact(s);
+            if (player != null) {
+                String[] str = null;
+                new AdminModeCommand().onCommand((CommandSender) player, getCommand("a"), "", str);
+            }
+        }
 
-		for (String server : MenuUtilities.icons.keySet()) {
-			PlayerCountUtilities.requestPlayerCount(server);
-		}
-	}
+        chatData.reloadProfiles();
+        getServer().getScheduler().cancelTasks(Nova.getInstance());
 
-	public void onReload() {
-		for (String s : adminPlayers) {
-			Player player = getServer().getPlayerExact(s);
-			if (player != null) {
-				String[] str = null;
-				new AdminModeCommand().onCommand((CommandSender) player, getCommand("a"), "", str);
-			}
-		}
+        loadLobbyLocation();
+    }
 
-		chatData.reloadProfiles();
-		getServer().getScheduler().cancelTasks(Nova.getInstance());
+    public void onDisable() {
+        for (String s : adminPlayers) {
+            Player player = getServer().getPlayerExact(s);
+            if (player != null) {
+                String[] str = null;
+                new AdminModeCommand().onCommand((CommandSender) player, getCommand("a"), "", str);
+            }
+        }
 
-		loadLobbyLocation();
-	}
+        getServer().getScheduler().cancelTasks(Nova.getInstance());
 
-	public void onDisable() {
-		for (String s : adminPlayers) {
-			Player player = getServer().getPlayerExact(s);
-			if (player != null) {
-				String[] str = null;
-				new AdminModeCommand().onCommand((CommandSender) player, getCommand("a"), "", str);
-			}
-		}
+        if (sql != null) {
+            sql.close();
+        }
 
-		getServer().getScheduler().cancelTasks(Nova.getInstance());
+        instance = null;
+    }
 
-		if (sql != null) {
-			sql.close();
-		}
+    public boolean onCommand(CommandSender cs, Command cmnd, String string, String[] strings) {
+        if (string.equalsIgnoreCase(getDescription().getName().toLowerCase())) {
+            if (strings.length == 0) {
+                cs.sendMessage(NovaMessages.PREFIX_GENERAL + getDescription().getName() + " version " + ChatColor.GREEN + getDescription().getVersion() + ChatColor.GRAY + " by chaseoes.");
+                cs.sendMessage(NovaMessages.PREFIX_GENERAL + "http://gameaurora.com");
+                return true;
+            }
 
-		instance = null;
-	}
+            if (strings[0].equalsIgnoreCase("send")) {
+                CloudMessage message = new CloudMessage("TEST MESSAGE!", CloudMessageType.CHAT.toString(), GeneralUtilities.getServerName(), GeneralUtilities.getPrettyServerName());
+                message.send();
+                cs.sendMessage("SENDING...");
+            }
 
-	public boolean onCommand(CommandSender cs, Command cmnd, String string, String[] strings) {
-		if (string.equalsIgnoreCase(getDescription().getName().toLowerCase())) {
-			if (strings.length == 0) {
-				cs.sendMessage(NovaMessages.PREFIX_GENERAL + getDescription().getName() + " version " + ChatColor.GREEN + getDescription().getVersion() + ChatColor.GRAY + " by chaseoes.");
-				cs.sendMessage(NovaMessages.PREFIX_GENERAL + "http://gameaurora.com");
-				return true;
-			}
+            if (strings[0].equalsIgnoreCase("getpos")) {
+                if (cs.hasPermission("nova.getpos")) {
+                    if (cs instanceof Player) {
+                        Location location = ((Player) cs).getLocation();
+                        cs.sendMessage(NovaMessages.PREFIX_GENERAL + "Your current location information:");
+                        cs.sendMessage(ChatColor.GRAY + "X: " + ChatColor.GREEN + location.getBlockX());
+                        cs.sendMessage(ChatColor.GRAY + "Y: " + ChatColor.GREEN + location.getBlockY());
+                        cs.sendMessage(ChatColor.GRAY + "Z: " + ChatColor.GREEN + location.getBlockZ());
+                        cs.sendMessage(ChatColor.GRAY + "Yaw: " + ChatColor.GREEN + location.getYaw());
+                        cs.sendMessage(ChatColor.GRAY + "Pitch: " + ChatColor.GREEN + location.getPitch());
+                        cs.sendMessage(ChatColor.GRAY + "Location String: " + ChatColor.GREEN + SerializableLocation.locationToString(location));
+                    } else {
+                        cs.sendMessage(NovaMessages.MUST_BE_PLAYER);
+                    }
+                } else {
+                    cs.sendMessage(NovaMessages.NO_PERMISSION);
+                }
+            }
+        } else {
+            cs.sendMessage(NovaMessages.PREFIX_ERROR + "That feature isn't enabled on this server.");
+        }
+        return true;
+    }
 
-			if (strings[0].equalsIgnoreCase("getpos")) {
-				if (cs.hasPermission("nova.getpos")) {
-					if (cs instanceof Player) {
-						Location location = ((Player) cs).getLocation();
-						cs.sendMessage(NovaMessages.PREFIX_GENERAL + "Your current location information:");
-						cs.sendMessage(ChatColor.GRAY + "X: " + ChatColor.GREEN + location.getBlockX());
-						cs.sendMessage(ChatColor.GRAY + "Y: " + ChatColor.GREEN + location.getBlockY());
-						cs.sendMessage(ChatColor.GRAY + "Z: " + ChatColor.GREEN + location.getBlockZ());
-						cs.sendMessage(ChatColor.GRAY + "Yaw: " + ChatColor.GREEN + location.getYaw());
-						cs.sendMessage(ChatColor.GRAY + "Pitch: " + ChatColor.GREEN + location.getPitch());
-						cs.sendMessage(ChatColor.GRAY + "Location String: " + ChatColor.GREEN + SerializableLocation.locationToString(location));
-					} else {
-						cs.sendMessage(NovaMessages.MUST_BE_PLAYER);
-					}
-				} else {
-					cs.sendMessage(NovaMessages.NO_PERMISSION);
-				}
-			}
-		} else {
-			cs.sendMessage(NovaMessages.PREFIX_ERROR + "That feature isn't enabled on this server.");
-		}
-		return true;
-	}
+    public boolean moduleIsEnabled(String name) {
+        return getConfig().getStringList("modules").contains(name);
+    }
 
-	@Override
-	public void onPluginMessageReceived(String channel, Player player, byte[] message) {
-		if (!channel.equals("BungeeCord")) {
-			return;
-		}
+    public void teleportToLobby(Player player) {
+        if (getServer().getWorld("lobby") != null) {
+            player.teleport(getServer().getWorld("lobby").getSpawnLocation());
+        }
+    }
 
-		DataInputStream in = new DataInputStream(new ByteArrayInputStream(message));
-		try {
-			String subchannel = in.readUTF();
-			if (subchannel.equals("PlayerCount")) {
-				try {
-					String server = in.readUTF();
-					int playerCount = in.readInt();
-					PlayerCountUtilities.setPlayerCount(server, playerCount);
-				} catch (Exception e) {
+    private void loadModules() {
+        PluginManager pm = getServer().getPluginManager();
+        if (moduleIsEnabled("logger")) {
+            pm.registerEvents(new LogListener(), this);
+        }
 
-				}
-				return;
-			}
+        if (moduleIsEnabled("pads")) {
+            pm.registerEvents(new PadListener(), this);
+            getCommand("lp").setExecutor(new PadCommands());
+        }
 
-			if (subchannel.equals("NovaChatMessageDISABLED")) {
-				short len = in.readShort();
-				byte[] msgbytes = new byte[len];
-				in.readFully(msgbytes);
-				DataInputStream msgin = new DataInputStream(new ByteArrayInputStream(msgbytes));
+        if (moduleIsEnabled("teleport")) {
+            getCommand("teleport").setExecutor(new TeleportCommand());
+            getCommand("teleporthere").setExecutor(new TeleportCommand());
+            getCommand("teleportaccept").setExecutor(new TeleportCommand());
+            getCommand("teleportdeny").setExecutor(new TeleportCommand());
+            getCommand("teleporttoggle").setExecutor(new TeleportCommand());
+        }
 
-				String serverName = msgin.readUTF();
-				String playerName = msgin.readUTF();
-				String chatFormat = msgin.readUTF();
-				String chatMessage = msgin.readUTF();
+        if (moduleIsEnabled("portals")) {
+            pm.registerEvents(new PortalListener(), this);
+        }
 
-				String finalMessage = String.format(chatFormat, playerName, chatMessage);
-				FancyMessage fancyMessage = new FancyMessage(finalMessage).tooltip(ChatColor.GREEN + "Current Server: " + ChatColor.AQUA + serverName);
+        if (moduleIsEnabled("chat")) {
+            chatData.reloadProfiles();
+            pm.registerEvents(new ChatListeners(), this);
+        }
 
-				for (Player onlinePlayer : getServer().getOnlinePlayers()) {
-					onlinePlayer.sendMessage(fancyMessage.toJSONString());
-					fancyMessage.send(onlinePlayer);
-				}
-				return;
-			}
+        if (moduleIsEnabled("signcolors")) {
+            pm.registerEvents(new SignColorListener(), this);
+        }
 
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
+        if (moduleIsEnabled("joinspawn")) {
+            pm.registerEvents(new JoinSpawnListener(), this);
+        }
 
-	public boolean moduleIsEnabled(String name) {
-		return getConfig().getStringList("modules").contains(name);
-	}
+        if (moduleIsEnabled("onlyproxyjoin")) {
+            pm.registerEvents(new OnlyProxyJoinListener(), this);
+        }
 
-	public void teleportToLobby(Player player) {
-		if (getServer().getWorld("lobby") != null) {
-			player.teleport(getServer().getWorld("lobby").getSpawnLocation());
-		}
-	}
+        if (moduleIsEnabled("hubcommand")) {
+            getCommand("hub").setExecutor(new HubCommand());
+        }
 
-	private void loadModules() {
-		PluginManager pm = getServer().getPluginManager();
-		if (moduleIsEnabled("logger")) {
-			pm.registerEvents(new LogListener(), this);
-		}
+        if (moduleIsEnabled("hidestream")) {
+            pm.registerEvents(new HideStreamListener(), this);
+        }
 
-		if (moduleIsEnabled("pads")) {
-			pm.registerEvents(new PadListener(), this);
-			getCommand("lp").setExecutor(new PadCommands());
-		}
+        if (moduleIsEnabled("autosave")) {
+            getServer().getScheduler().runTaskTimer(this, new AutosaveTask(), 0L, 1200L);
+        }
 
-		if (moduleIsEnabled("teleport")) {
-			getCommand("teleport").setExecutor(new TeleportCommand());
-			getCommand("teleporthere").setExecutor(new TeleportCommand());
-			getCommand("teleportaccept").setExecutor(new TeleportCommand());
-			getCommand("teleportdeny").setExecutor(new TeleportCommand());
-			getCommand("teleporttoggle").setExecutor(new TeleportCommand());
-		}
+        if (moduleIsEnabled("adminmode")) {
+            getServer().getScheduler().runTaskTimer(this, new AdminModeTask(), 0L, 20L);
+            getCommand("adminmode").setExecutor(new AdminModeCommand());
+            pm.registerEvents(new AdminModeListeners(), this);
+        }
 
-		if (moduleIsEnabled("portals")) {
-			pm.registerEvents(new PortalListener(), this);
-		}
+        if (moduleIsEnabled("bans")) {
+            BanUtilities.getInstance();
+            getCommand("ban").setExecutor(new BanCommand());
+            getCommand("unban").setExecutor(new UnbanCommand());
+            getCommand("isbanned").setExecutor(new IsBannedCommand());
+            getServer().getPluginManager().registerEvents(new BansListener(), this);
+        }
 
-		if (moduleIsEnabled("chat")) {
-			chatData.reloadProfiles();
-			pm.registerEvents(new ChatListeners(), this);
-		}
+        if (moduleIsEnabled("menu")) {
+            MenuUtilities.loadIcons();
+            pm.registerEvents(new MenuListeners(), this);
+            getCommand("s").setExecutor(new ServerMenuCommand());
+        }
 
-		if (moduleIsEnabled("signcolors")) {
-			pm.registerEvents(new SignColorListener(), this);
-		}
+        if (moduleIsEnabled("signlinks")) {
+            pm.registerEvents(new SignLinkListener(), this);
+        }
 
-		if (moduleIsEnabled("joinspawn")) {
-			pm.registerEvents(new JoinSpawnListener(), this);
-		}
+        if (moduleIsEnabled("punch")) {
+            pm.registerEvents(new PunchListener(), this);
+        }
 
-		if (moduleIsEnabled("onlyproxyjoin")) {
-			pm.registerEvents(new OnlyProxyJoinListener(), this);
-		}
+        if (moduleIsEnabled("arrowtp")) {
+            pm.registerEvents(new ArrowTeleportListeners(), this);
+        }
 
-		if (moduleIsEnabled("hubcommand")) {
-			getCommand("hub").setExecutor(new HubCommand());
-		}
+        if (moduleIsEnabled("tokens")) {
+            TokenDataFile.reloadDataFile();
+            TokenData.load();
+            getCommand("tokens").setExecutor(new TokenCommands());
+            pm.registerEvents(new TokenListeners(), this);
+        }
 
-		if (moduleIsEnabled("hidestream")) {
-			pm.registerEvents(new HideStreamListener(), this);
-		}
+        if (moduleIsEnabled("superspeed")) {
+            pm.registerEvents(new SuperSpeedListener(), this);
+        }
 
-		if (moduleIsEnabled("autosave")) {
-			getServer().getScheduler().runTaskTimer(this, new AutosaveTask(), 0L, 1200L);
-		}
+        if (moduleIsEnabled("kick")) {
+            getCommand("kick").setExecutor(new KickCommand());
+        }
 
-		if (moduleIsEnabled("adminmode")) {
-			getServer().getScheduler().runTaskTimer(this, new AdminModeTask(), 0L, 20L);
-			getCommand("adminmode").setExecutor(new AdminModeCommand());
-			pm.registerEvents(new AdminModeListeners(), this);
-		}
+        if (moduleIsEnabled("blockcommands")) {
+            getCommand("bc").setExecutor(new BlockCommandsCommands());
+            pm.registerEvents(new BlockCommandsListeners(), this);
+        }
 
-		if (moduleIsEnabled("bans")) {
-			BanUtilities.getInstance();
-			getCommand("ban").setExecutor(new BanCommand());
-			getCommand("unban").setExecutor(new UnbanCommand());
-			getCommand("isbanned").setExecutor(new IsBannedCommand());
-			getServer().getPluginManager().registerEvents(new BansListener(), this);
-		}
+        if (moduleIsEnabled("maintenancemode")) {
+            getServer().getScheduler().runTaskTimer(this, new MaintenanceModeTask(), 0L, 3600L);
+        }
 
-		if (moduleIsEnabled("menu")) {
-			MenuUtilities.loadIcons();
-			pm.registerEvents(new MenuListeners(), this);
-			getCommand("s").setExecutor(new ServerMenuCommand());
-		}
+        if (moduleIsEnabled("pingchat")) {
+            pm.registerEvents(new PingChatListener(), this);
+        }
 
-		if (moduleIsEnabled("signlinks")) {
-			pm.registerEvents(new SignLinkListener(), this);
-		}
+        if (moduleIsEnabled("commandshortcuts")) {
+            pm.registerEvents(new CommandShortcutListener(), this);
+        }
 
-		if (moduleIsEnabled("punch")) {
-			pm.registerEvents(new PunchListener(), this);
-		}
+        if (moduleIsEnabled("nametags")) {
+            for (Player player : getServer().getOnlinePlayers()) {
+                ServerScoreboard board = new ServerScoreboard(player);
+                board.updateBoard();
+            }
+        }
 
-		if (moduleIsEnabled("arrowtp")) {
-			pm.registerEvents(new ArrowTeleportListeners(), this);
-		}
+        if (moduleIsEnabled("announcer")) {
+            getServer().getScheduler().runTaskTimer(this, new AnnouncerTask(), 0L, 5L * 60L * 20L);
+        }
+    }
 
-		if (moduleIsEnabled("nametags")) {
-			ServerScoreboard.clear();
-			ServerScoreboard.load();
-			ServerScoreboard.updateBoard();
-		}
+    public SQLUtilities getSQL() {
+        return sql;
+    }
 
-		if (moduleIsEnabled("superspeed")) {
-			pm.registerEvents(new SuperSpeedListener(), this);
-		}
+    private void loadLobbyLocation() {
+        LOBBY_LOCATION = new Location(getInstance().getServer().getWorld("lobby"), 0.5, 65, 0.5, -180, 0);
+    }
 
-		if (moduleIsEnabled("kick")) {
-			getCommand("kick").setExecutor(new KickCommand());
-		}
+    public void updateScoreboard(Player player) {
+        ServerScoreboard board = new ServerScoreboard(player);
+        board.updateBoard();
+    }
 
-		if (moduleIsEnabled("blockcommands")) {
-			getCommand("bc").setExecutor(new BlockCommandsCommands());
-			pm.registerEvents(new BlockCommandsListeners(), this);
-		}
-
-		if (moduleIsEnabled("maintenancemode")) {
-			getServer().getScheduler().runTaskTimer(this, new MaintenanceModeTask(), 0L, 3600L);
-		}
-
-		if (moduleIsEnabled("pingchat")) {
-			pm.registerEvents(new PingChatListener(), this);
-		}
-	}
-
-	public SQLUtilities getSQL() {
-		return sql;
-	}
-
-	private void loadLobbyLocation() {
-		LOBBY_LOCATION = new Location(getInstance().getServer().getWorld("lobby"), 0.5, 65, 0.5, -180, 0);
-	}
+    public WorldGuardPlugin getWorldGuard() {
+        return worldGuard;
+    }
 
 }

@@ -20,6 +20,7 @@ import org.bukkit.inventory.ItemStack;
 
 import com.gameaurora.nova.Nova;
 import com.gameaurora.nova.utilities.GeneralUtilities;
+import com.gameaurora.nova.utilities.IconMenu;
 
 public class MenuListeners implements Listener {
 

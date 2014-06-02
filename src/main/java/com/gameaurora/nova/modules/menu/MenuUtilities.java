@@ -10,7 +10,7 @@ import org.bukkit.Material;
 
 import com.gameaurora.nova.Nova;
 import com.gameaurora.nova.utilities.BungeeUtilities;
-import com.gameaurora.nova.modules.menu.IconMenu;
+import com.gameaurora.nova.utilities.IconMenu;
 
 public class MenuUtilities {
 

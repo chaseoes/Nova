@@ -2,7 +2,7 @@ name: ${project.name}
 main: ${project.groupId}.${upload.dbo.slug}.${project.name}
 version: ${project.version}
 description: ${project.description}
-softdepend: [zPermissions]
+softdepend: [zPermissions, WorldGuard, Vault]
 commands:
   ${upload.dbo.slug}:
     description: The central command for the ${project.name} plugin.
@@ -59,4 +59,7 @@ commands:
     usage: /<command> [args]
   s:
     description: Server menu!
+    usage: /<command> [args]
+  tokens:
+    description: Tokens!
     usage: /<command> [args]
