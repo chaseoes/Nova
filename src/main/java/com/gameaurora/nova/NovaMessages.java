@@ -12,5 +12,6 @@ public class NovaMessages {
     public static final String BANNED = ChatColor.RED + "\n\nYou are banned for violating our rules.\nReview our rules at: " + ChatColor.AQUA + "http://gameaurora.com/rules\n\n" + ChatColor.RED + "Proof/reason for ban: " + ChatColor.GRAY;
     public static final String KICKED = PREFIX_ERROR + "You have been kicked for violating our rules.\n\nReview our rules at: " + ChatColor.AQUA + "http://gameaurora.com/rules";
     public static final String ANNOUNCER_PREFIX = ChatColor.GRAY + "[" + ChatColor.GREEN + "" + ChatColor.BOLD + "Aurora" + ChatColor.GRAY + "] ";
+    public static final String FIRST_JOIN = "&d%player joined Aurora for the first time!";
 
 }

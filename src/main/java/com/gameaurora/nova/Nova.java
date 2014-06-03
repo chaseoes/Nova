@@ -26,13 +26,13 @@ import com.gameaurora.nova.modules.announcer.AnnouncerTask;
 import com.gameaurora.nova.modules.arrowtp.ArrowTeleportListeners;
 import com.gameaurora.nova.modules.blockcommands.BlockCommandsCommands;
 import com.gameaurora.nova.modules.blockcommands.BlockCommandsListeners;
+import com.gameaurora.nova.modules.broadcastfirstjoin.FirstJoinListener;
 import com.gameaurora.nova.modules.chat.ChatData;
 import com.gameaurora.nova.modules.chat.ChatListeners;
-import com.gameaurora.nova.modules.cloudmessages.CloudMessage;
 import com.gameaurora.nova.modules.cloudmessages.CloudMessageListeners;
 import com.gameaurora.nova.modules.cloudmessages.CloudMessageReceiveListener;
-import com.gameaurora.nova.modules.cloudmessages.CloudMessageType;
 import com.gameaurora.nova.modules.commandshortcuts.CommandShortcutListener;
+import com.gameaurora.nova.modules.creativepass.CreativePassListener;
 import com.gameaurora.nova.modules.hidestream.HideStreamListener;
 import com.gameaurora.nova.modules.hubcommand.HubCommand;
 import com.gameaurora.nova.modules.joinspawn.JoinSpawnListener;
@@ -60,7 +60,6 @@ import com.gameaurora.nova.modules.tokens.TokenCommands;
 import com.gameaurora.nova.modules.tokens.TokenData;
 import com.gameaurora.nova.modules.tokens.TokenDataFile;
 import com.gameaurora.nova.modules.tokens.TokenListeners;
-import com.gameaurora.nova.utilities.GeneralUtilities;
 import com.gameaurora.nova.utilities.PlayerStateStorage;
 import com.gameaurora.nova.utilities.SQLUtilities;
 import com.gameaurora.nova.utilities.SerializableLocation;
@@ -153,12 +152,6 @@ public class Nova extends JavaPlugin {
                 cs.sendMessage(NovaMessages.PREFIX_GENERAL + getDescription().getName() + " version " + ChatColor.GREEN + getDescription().getVersion() + ChatColor.GRAY + " by chaseoes.");
                 cs.sendMessage(NovaMessages.PREFIX_GENERAL + "http://gameaurora.com");
                 return true;
-            }
-
-            if (strings[0].equalsIgnoreCase("send")) {
-                CloudMessage message = new CloudMessage("TEST MESSAGE!", CloudMessageType.CHAT.toString(), GeneralUtilities.getServerName(), GeneralUtilities.getPrettyServerName());
-                message.send();
-                cs.sendMessage("SENDING...");
             }
 
             if (strings[0].equalsIgnoreCase("getpos")) {
@@ -325,6 +318,14 @@ public class Nova extends JavaPlugin {
         if (moduleIsEnabled("privatemessages")) {
             getCommand("message").setExecutor(new MessageCommands());
             getCommand("reply").setExecutor(new MessageCommands());
+        }
+
+        if (moduleIsEnabled("broadcastfirstjoin")) {
+            pm.registerEvents(new FirstJoinListener(), this);
+        }
+
+        if (moduleIsEnabled("creativepass")) {
+            pm.registerEvents(new CreativePassListener(), this);
         }
     }
 

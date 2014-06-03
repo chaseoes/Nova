@@ -27,6 +27,10 @@ modules:
 - pingchat
 - tokens
 - announcer
+- privatemessages
+- cloudmessages
+- broadcastfirstjoin
+- creativepass
 server-name: undefined
 pretty-server-name: Undefined
 command-shortcuts:

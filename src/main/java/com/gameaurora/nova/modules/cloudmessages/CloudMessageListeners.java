@@ -2,6 +2,7 @@ package com.gameaurora.nova.modules.cloudmessages;
 
 import mkremins.fanciful.FancyMessage;
 
+import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -31,6 +32,10 @@ public class CloudMessageListeners implements Listener {
                     fancyMessage.send(player);
                 }
             }
+        }
+
+        if (message.getMessageType() == CloudMessageType.ALERT) {
+            Nova.getInstance().getServer().broadcastMessage(ChatColor.translateAlternateColorCodes('&', message.getMessage()));
         }
 
         if (message.getMessageType() == CloudMessageType.PLAYER_COUNT) {
