@@ -30,7 +30,13 @@ public class AnnouncerTask extends BukkitRunnable {
     }
 
     private String getAnnouncement(int id) {
-        return Nova.getInstance().getConfig().getStringList("announcements").get(id);
+        String announcement;
+        try {
+            announcement = Nova.getInstance().getConfig().getStringList("announcements").get(id);
+        } catch (Exception e) {
+            return null;
+        }
+        return announcement;
     }
 
 }

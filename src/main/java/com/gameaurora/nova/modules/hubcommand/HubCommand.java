@@ -12,31 +12,31 @@ import com.gameaurora.nova.utilities.GeneralUtilities;
 
 public class HubCommand implements CommandExecutor {
 
-	public boolean onCommand(CommandSender cs, Command cmnd, String string, String[] strings) {
-		if (!(cs instanceof Player)) {
-			cs.sendMessage(NovaMessages.MUST_BE_PLAYER);
-			return true;
-		}
+    public boolean onCommand(CommandSender cs, Command cmnd, String string, String[] strings) {
+        if (!(cs instanceof Player)) {
+            cs.sendMessage(NovaMessages.MUST_BE_PLAYER);
+            return true;
+        }
 
-		final Player player = (Player) cs;
-		if (strings != null && strings.length > 0) {
-			if (strings[0].equalsIgnoreCase("-o")) {
-				player.teleport(Nova.LOBBY_LOCATION);
-			}
-			return true;
-		}
+        final Player player = (Player) cs;
+        if (strings != null && strings.length > 0) {
+            if (strings[0].equalsIgnoreCase("-o")) {
+                player.teleport(Nova.LOBBY_LOCATION);
+            }
+            return true;
+        }
 
-		if (GeneralUtilities.getServerName().equals("survival") && !string.equals("hub")) {
-			Nova.getInstance().getServer().getScheduler().runTaskLater(Nova.getInstance(), new Runnable() {
-				public void run() {
-					player.performCommand("mvspawn");
-				}
-			}, 10L);
-			return true;
-		}
+        if ((GeneralUtilities.getServerName().equals("survival") && !string.equals("hub")) || GeneralUtilities.getServerName().equals("skyblock") && !string.equals("hub")) {
+            Nova.getInstance().getServer().getScheduler().runTaskLater(Nova.getInstance(), new Runnable() {
+                public void run() {
+                    player.performCommand("mvspawn");
+                }
+            }, 10L);
+            return true;
+        }
 
-		BungeeUtilities.sendToServer(player, "hub");
-		return true;
-	}
+        BungeeUtilities.sendToServer(player, "hub");
+        return true;
+    }
 
 }

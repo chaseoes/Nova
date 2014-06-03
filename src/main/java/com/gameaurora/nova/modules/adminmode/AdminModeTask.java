@@ -6,19 +6,21 @@ import org.bukkit.scheduler.BukkitRunnable;
 
 import com.gameaurora.nova.Nova;
 
+// TODO: getPlayer is deprecated. :(
+@SuppressWarnings("deprecation")
 public class AdminModeTask extends BukkitRunnable {
 
-	public void run() {
-		for (String s : Nova.getInstance().adminPlayers) {
-			Player player = Nova.getInstance().getServer().getPlayer(s);
-			if (player != null) {
-				if (player.getGameMode() != GameMode.CREATIVE) {
-					player.setGameMode(GameMode.CREATIVE);
-				}
+    public void run() {
+        for (String s : Nova.getInstance().adminPlayers) {
+            Player player = Nova.getInstance().getServer().getPlayer(s);
+            if (player != null) {
+                if (player.getGameMode() != GameMode.CREATIVE) {
+                    player.setGameMode(GameMode.CREATIVE);
+                }
 
-				player.setHealth(player.getMaxHealth());
-			}
-		}
-	}
+                player.setHealth(player.getMaxHealth());
+            }
+        }
+    }
 
 }

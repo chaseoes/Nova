@@ -49,6 +49,7 @@ import com.gameaurora.nova.modules.pads.PadCommands;
 import com.gameaurora.nova.modules.pads.PadListener;
 import com.gameaurora.nova.modules.pingchat.PingChatListener;
 import com.gameaurora.nova.modules.portals.PortalListener;
+import com.gameaurora.nova.modules.privatemessages.MessageCommands;
 import com.gameaurora.nova.modules.punch.PunchListener;
 import com.gameaurora.nova.modules.signcolors.SignColorListener;
 import com.gameaurora.nova.modules.signlinks.SignLinkListener;
@@ -65,6 +66,8 @@ import com.gameaurora.nova.utilities.SQLUtilities;
 import com.gameaurora.nova.utilities.SerializableLocation;
 import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
 
+// TODO: getPlayer is deprecated. :(
+@SuppressWarnings("deprecation")
 public class Nova extends JavaPlugin {
 
     private static Nova instance;
@@ -317,6 +320,11 @@ public class Nova extends JavaPlugin {
 
         if (moduleIsEnabled("announcer")) {
             getServer().getScheduler().runTaskTimer(this, new AnnouncerTask(), 0L, 5L * 60L * 20L);
+        }
+
+        if (moduleIsEnabled("privatemessages")) {
+            getCommand("message").setExecutor(new MessageCommands());
+            getCommand("reply").setExecutor(new MessageCommands());
         }
     }
 

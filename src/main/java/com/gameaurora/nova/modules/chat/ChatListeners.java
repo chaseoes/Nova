@@ -12,22 +12,18 @@ import org.bukkit.event.player.PlayerQuitEvent;
 
 import com.gameaurora.nova.Nova;
 import com.gameaurora.nova.NovaMessages;
+import com.gameaurora.nova.modules.cloudmessages.CloudMessage;
+import com.gameaurora.nova.modules.cloudmessages.CloudMessageType;
+import com.gameaurora.nova.modules.cloudmessages.CloudMessageUtilities;
 import com.gameaurora.nova.modules.nametags.ServerScoreboard;
+import com.gameaurora.nova.utilities.GeneralUtilities;
 
 public class ChatListeners implements Listener {
 
     @EventHandler(priority = EventPriority.HIGH)
     public void onAsyncChat(final AsyncPlayerChatEvent event) {
-        Nova.getInstance().getServer().getScheduler().runTask(Nova.getInstance(), new Runnable() {
-            public void run() {
-                // BungeeUtilities.forwardChatMessage("ALL",
-                // Nova.getInstance().getConfig().getString("pretty-server-name"),
-                // event.getPlayer().getName(), event.getFormat(),
-                // event.getMessage());
-            }
-        });
 
-        Player player = event.getPlayer();
+        final Player player = event.getPlayer();
         try {
             ConcurrentHashMap<String, ChatProfile> profiles = Nova.getInstance().chatData.profiles;
             if (profiles.containsKey(player.getName())) {
@@ -35,20 +31,42 @@ public class ChatListeners implements Listener {
                 if (profile.isLoaded()) {
                     event.setFormat(profile.getChatFormat());
                 } else {
-                    player.sendMessage(notReady());
+                    Nova.getInstance().getServer().getScheduler().runTask(Nova.getInstance(), new Runnable() {
+                        public void run() {
+                            player.sendMessage(notReady());
+                        }
+                    });
                     event.setCancelled(true);
                     return;
                 }
             } else {
-                player.sendMessage(notReady());
+                Nova.getInstance().getServer().getScheduler().runTask(Nova.getInstance(), new Runnable() {
+                    public void run() {
+                        player.sendMessage(notReady());
+                    }
+                });
                 event.setCancelled(true);
                 return;
             }
         } catch (Exception e) {
             event.setCancelled(true);
             e.printStackTrace();
-            player.sendMessage(NovaMessages.PREFIX_ERROR + "An error occurred while handling your chat message.");
+            Nova.getInstance().getServer().getScheduler().runTask(Nova.getInstance(), new Runnable() {
+                public void run() {
+                    player.sendMessage(NovaMessages.PREFIX_ERROR + "An error occurred while handling your chat message.");
+                }
+            });
         }
+
+        Nova.getInstance().getServer().getScheduler().runTask(Nova.getInstance(), new Runnable() {
+            public void run() {
+                if (Nova.getInstance().moduleIsEnabled("cloudmessages")) {
+                    String unformattedMessage = CloudMessageUtilities.createChatMessageString(event.getFormat(), event.getPlayer().getDisplayName(), event.getMessage());
+                    CloudMessage message = new CloudMessage(unformattedMessage, CloudMessageType.CHAT.toString(), GeneralUtilities.getServerName(), GeneralUtilities.getPrettyServerName());
+                    message.send();
+                }
+            }
+        });
     }
 
     @EventHandler(priority = EventPriority.LOW)

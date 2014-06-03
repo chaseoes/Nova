@@ -63,3 +63,11 @@ commands:
   tokens:
     description: Tokens!
     usage: /<command> [args]
+  message:
+    description: Message another player.
+    usage: /msg <player> <message>
+    aliases: [tell,message,whisper,pm,msg,w]
+  reply:
+    description: Reply to another player.
+    usage: /r <message>
+    aliases: [r]

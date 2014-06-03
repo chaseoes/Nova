@@ -2,6 +2,6 @@ package com.gameaurora.nova.modules.cloudmessages;
 
 public enum CloudMessageType {
 
-    CHAT, PRIVATE_MESSAGE, ALERT;
+    PLAYER_COUNT, CHAT, PRIVATE_MESSAGE, ALERT;
 
 }
