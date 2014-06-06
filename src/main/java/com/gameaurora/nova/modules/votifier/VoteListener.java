@@ -27,11 +27,12 @@ public class VoteListener implements Listener {
             player.playSound(player.getLocation(), Sound.NOTE_PIANO, 1, 1);
         }
 
-        Nova.getInstance().getServer().dispatchCommand(Nova.getInstance().getServer().getConsoleSender(), "fe grant " + vote.getUsername() + " 2000");
-
-        Player player = Nova.getInstance().getServer().getPlayerExact(vote.getUsername());
+        Player player = Nova.getInstance().getServer().getPlayer(vote.getUsername().toLowerCase());
         if (player != null) {
+            Nova.getInstance().getServer().dispatchCommand(Nova.getInstance().getServer().getConsoleSender(), "fe grant " + player.getName() + " 2000");
             player.sendMessage(ChatColor.AQUA + "Thanks for voting, " + ChatColor.GREEN + player.getName() + ChatColor.AQUA + "! Check how much money you have by typing " + ChatColor.GREEN + "/money" + ChatColor.AQUA + "!");
+        } else {
+            Nova.getInstance().getServer().dispatchCommand(Nova.getInstance().getServer().getConsoleSender(), "fe grant " + vote.getUsername() + " 2000");
         }
     }
 
