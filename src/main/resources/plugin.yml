@@ -2,7 +2,7 @@ name: ${project.name}
 main: ${project.groupId}.${upload.dbo.slug}.${project.name}
 version: ${project.version}
 description: ${project.description}
-softdepend: [zPermissions, WorldGuard, Vault]
+softdepend: [zPermissions, WorldGuard, Vault, Votifier]
 commands:
   ${upload.dbo.slug}:
     description: The central command for the ${project.name} plugin.
@@ -71,3 +71,7 @@ commands:
     description: Reply to another player.
     usage: /r <message>
     aliases: [r]
+  clearchat:
+    description: Clear chat!
+    usage: /<command> [args]
+    aliases: [cc]

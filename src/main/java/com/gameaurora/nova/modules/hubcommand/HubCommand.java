@@ -26,13 +26,19 @@ public class HubCommand implements CommandExecutor {
             return true;
         }
 
-        if ((GeneralUtilities.getServerName().equals("survival") && !string.equals("hub")) || GeneralUtilities.getServerName().equals("skyblock") && !string.equals("hub")) {
-            Nova.getInstance().getServer().getScheduler().runTaskLater(Nova.getInstance(), new Runnable() {
-                public void run() {
-                    player.performCommand("mvspawn");
-                }
-            }, 10L);
-            return true;
+        String server = GeneralUtilities.getServerName();
+        if (server.equalsIgnoreCase("survival")) {
+            if (!string.startsWith("h")) {
+                player.performCommand("mvspawn");
+                return true;
+            }
+        }
+
+        if (server.equalsIgnoreCase("skyblock")) {
+            if (!string.startsWith("h")) {
+                player.performCommand("lobby -o");
+                return true;
+            }
         }
 
         BungeeUtilities.sendToServer(player, "hub");

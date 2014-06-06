@@ -1,5 +1,6 @@
 package com.gameaurora.nova.modules.broadcastfirstjoin;
 
+import org.bukkit.ChatColor;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -15,7 +16,7 @@ public class FirstJoinListener implements Listener {
     public void onPlayerJoin(PlayerJoinEvent event) {
         if (!event.getPlayer().hasPlayedBefore()) {
             BungeeUtilities.broadcastMessage(NovaMessages.FIRST_JOIN.replace("%player", event.getPlayer().getName()));
-            Nova.getInstance().getServer().broadcastMessage(NovaMessages.FIRST_JOIN.replace("%player", event.getPlayer().getName()));
+            Nova.getInstance().getServer().broadcastMessage(ChatColor.translateAlternateColorCodes('&', NovaMessages.FIRST_JOIN.replace("%player", event.getPlayer().getName())));
             return;
         }
     }

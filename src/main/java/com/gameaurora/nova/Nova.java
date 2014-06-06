@@ -27,6 +27,7 @@ import com.gameaurora.nova.modules.arrowtp.ArrowTeleportListeners;
 import com.gameaurora.nova.modules.blockcommands.BlockCommandsCommands;
 import com.gameaurora.nova.modules.blockcommands.BlockCommandsListeners;
 import com.gameaurora.nova.modules.broadcastfirstjoin.FirstJoinListener;
+import com.gameaurora.nova.modules.chat.ChatCommands;
 import com.gameaurora.nova.modules.chat.ChatData;
 import com.gameaurora.nova.modules.chat.ChatListeners;
 import com.gameaurora.nova.modules.cloudmessages.CloudMessageListeners;
@@ -60,6 +61,7 @@ import com.gameaurora.nova.modules.tokens.TokenCommands;
 import com.gameaurora.nova.modules.tokens.TokenData;
 import com.gameaurora.nova.modules.tokens.TokenDataFile;
 import com.gameaurora.nova.modules.tokens.TokenListeners;
+import com.gameaurora.nova.modules.votifier.VoteListener;
 import com.gameaurora.nova.utilities.PlayerStateStorage;
 import com.gameaurora.nova.utilities.SQLUtilities;
 import com.gameaurora.nova.utilities.SerializableLocation;
@@ -214,6 +216,7 @@ public class Nova extends JavaPlugin {
         if (moduleIsEnabled("chat")) {
             chatData.reloadProfiles();
             pm.registerEvents(new ChatListeners(), this);
+            getCommand("clearchat").setExecutor(new ChatCommands());
         }
 
         if (moduleIsEnabled("signcolors")) {
@@ -326,6 +329,10 @@ public class Nova extends JavaPlugin {
 
         if (moduleIsEnabled("creativepass")) {
             pm.registerEvents(new CreativePassListener(), this);
+        }
+
+        if (moduleIsEnabled("votifier")) {
+            pm.registerEvents(new VoteListener(), this);
         }
     }
 

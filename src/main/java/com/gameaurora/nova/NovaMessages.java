@@ -13,5 +13,8 @@ public class NovaMessages {
     public static final String KICKED = PREFIX_ERROR + "You have been kicked for violating our rules.\n\nReview our rules at: " + ChatColor.AQUA + "http://gameaurora.com/rules";
     public static final String ANNOUNCER_PREFIX = ChatColor.GRAY + "[" + ChatColor.GREEN + "" + ChatColor.BOLD + "Aurora" + ChatColor.GRAY + "] ";
     public static final String FIRST_JOIN = "&d%player joined Aurora for the first time!";
+    public static final String VOTE = "&a%player &djust voted and received &b2,000 tokens&d!";
+    public static final String VOTE_SITE = ChatColor.GREEN + "You can vote for tokens! Go to: " + ChatColor.AQUA + "http://gameaurora.com/vote";
+    public static final String BAR = ChatColor.DARK_GRAY + "-----------------------------------------------------";
 
 }

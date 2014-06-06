@@ -31,6 +31,7 @@ modules:
 - cloudmessages
 - broadcastfirstjoin
 - creativepass
+- votifier
 server-name: undefined
 pretty-server-name: Undefined
 command-shortcuts:

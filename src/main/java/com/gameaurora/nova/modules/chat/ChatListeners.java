@@ -1,7 +1,12 @@
 package com.gameaurora.nova.modules.chat;
 
+import java.util.HashMap;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
+import mkremins.fanciful.FancyMessage;
+
+import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -20,6 +25,8 @@ import com.gameaurora.nova.utilities.GeneralUtilities;
 
 public class ChatListeners implements Listener {
 
+    public static HashMap<UUID, Long> tracker = new HashMap<UUID, Long>();
+
     @EventHandler(priority = EventPriority.HIGH)
     public void onAsyncChat(final AsyncPlayerChatEvent event) {
 
@@ -30,6 +37,8 @@ public class ChatListeners implements Listener {
                 ChatProfile profile = Nova.getInstance().chatData.profiles.get(player.getName());
                 if (profile.isLoaded()) {
                     event.setFormat(profile.getChatFormat());
+                    event.setCancelled(true);
+                    sendChatMessage(event.getFormat(), player.getDisplayName(), event.getMessage());
                 } else {
                     Nova.getInstance().getServer().getScheduler().runTask(Nova.getInstance(), new Runnable() {
                         public void run() {
@@ -83,6 +92,14 @@ public class ChatListeners implements Listener {
     @EventHandler(priority = EventPriority.HIGH)
     public void onPlayerQuit(PlayerQuitEvent event) {
         Nova.getInstance().chatData.profiles.remove(event.getPlayer().getName());
+    }
+
+    private void sendChatMessage(String format, String playerName, String unformattedMessage) {
+        String finalMessage = String.format(format, playerName, unformattedMessage);
+        FancyMessage fm = new FancyMessage(finalMessage).tooltip(ChatColor.GREEN + playerName + " is on the same server as you!");
+        for (Player player : Nova.getInstance().getServer().getOnlinePlayers()) {
+            fm.send(player);
+        }
     }
 
     private String notReady() {
