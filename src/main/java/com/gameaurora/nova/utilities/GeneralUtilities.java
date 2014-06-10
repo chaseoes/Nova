@@ -86,4 +86,12 @@ public class GeneralUtilities {
         return name + "'s";
     }
 
+    public static List<String> makeCopy(List<String> list) {
+        List<String> newString = new ArrayList<String>();
+        for (String listItem : list) {
+            newString.add(listItem);
+        }
+        return newString;
+    }
+
 }

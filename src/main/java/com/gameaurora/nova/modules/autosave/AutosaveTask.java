@@ -1,4 +1,4 @@
-package com.gameaurora.modules.autosave;
+package com.gameaurora.nova.modules.autosave;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;

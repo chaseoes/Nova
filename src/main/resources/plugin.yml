@@ -75,3 +75,13 @@ commands:
     description: Clear chat!
     usage: /<command> [args]
     aliases: [cc]
+  farmworld:
+    description: Farmworld!
+    usage: /<command> [args]
+  locate:
+    description: Where''s waldo?
+    usage: /<command> [args]
+  broadcast:
+    description: Broadcast!
+    usage: /<command> [args]
+    

@@ -12,8 +12,8 @@ import org.bukkit.scoreboard.ScoreboardManager;
 import org.bukkit.scoreboard.Team;
 
 import com.gameaurora.nova.Nova;
-import com.gameaurora.nova.modules.tokens.TokenData;
 import com.gameaurora.nova.utilities.PermissionUtilities;
+import com.gameaurora.nova.utilities.bungee.BungeeOnlinePlayerStorage;
 
 public class ServerScoreboard {
 
@@ -50,15 +50,10 @@ public class ServerScoreboard {
 
     @SuppressWarnings("deprecation")
     public void updateBoard() {
-        if (Nova.getInstance().moduleIsEnabled("tokens")) {
-            sidebarObjective.getScore(Nova.getInstance().getServer().getOfflinePlayer(offlinePlayerName)).setScore(0);
-            sidebarObjective.getScore(Nova.getInstance().getServer().getOfflinePlayer(offlinePlayerName)).setScore(TokenData.getTokens(player));
-        }
-
-        for (Player player : Nova.getInstance().getServer().getOnlinePlayers()) {
-            Team groupTeam = getTeam(PermissionUtilities.getGroupForPlayer(player));
-            if (!groupTeam.hasPlayer(player)) {
-                groupTeam.addPlayer(player);
+        for (String playerName : BungeeOnlinePlayerStorage.getOnlinePlayers()) {
+            Team groupTeam = getTeam(PermissionUtilities.getGroupForPlayer(playerName));
+            if (!groupTeam.hasPlayer(Nova.getInstance().getServer().getOfflinePlayer(playerName))) {
+                groupTeam.addPlayer(Nova.getInstance().getServer().getOfflinePlayer(playerName));
             }
         }
 

@@ -1,4 +1,4 @@
-package com.gameaurora.modules.bans;
+package com.gameaurora.nova.modules.bans;
 
 import java.util.UUID;
 

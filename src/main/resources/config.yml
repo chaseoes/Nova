@@ -32,6 +32,9 @@ modules:
 - broadcastfirstjoin
 - creativepass
 - votifier
+- farmworld
+- locate
+- tnt
 server-name: undefined
 pretty-server-name: Undefined
 command-shortcuts:

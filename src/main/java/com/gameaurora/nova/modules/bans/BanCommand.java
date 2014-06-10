@@ -1,4 +1,4 @@
-package com.gameaurora.modules.bans;
+package com.gameaurora.nova.modules.bans;
 
 import java.util.UUID;
 
@@ -12,6 +12,9 @@ import org.bukkit.entity.Player;
 
 import com.gameaurora.nova.Nova;
 import com.gameaurora.nova.NovaMessages;
+import com.gameaurora.nova.modules.cloudmessages.CloudMessage;
+import com.gameaurora.nova.modules.cloudmessages.CloudMessageType;
+import com.gameaurora.nova.utilities.GeneralUtilities;
 
 // TODO: getPlayer is deprecated. :(
 @SuppressWarnings("deprecation")
@@ -67,6 +70,9 @@ public class BanCommand implements CommandExecutor {
                     }
                 });
             }
+
+            BanUtilities.getInstance().syncBans();
+            new CloudMessage(player, CloudMessageType.KICK.toString(), GeneralUtilities.getServerName(), GeneralUtilities.getPrettyServerName()).send();
         }
         return true;
     }

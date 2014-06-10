@@ -1,4 +1,4 @@
-package com.gameaurora.modules.bans;
+package com.gameaurora.nova.modules.bans;
 
 import com.google.common.collect.ImmutableList;
 import org.json.simple.JSONArray;

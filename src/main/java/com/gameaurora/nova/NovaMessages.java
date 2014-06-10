@@ -16,5 +16,7 @@ public class NovaMessages {
     public static final String VOTE = "&a%player &djust voted and received &b2,000 tokens&d!";
     public static final String VOTE_SITE = ChatColor.GREEN + "You can vote for tokens! Go to: " + ChatColor.AQUA + "http://gameaurora.com/vote";
     public static final String BAR = ChatColor.DARK_GRAY + "-----------------------------------------------------";
+    public static final String TELEPORT_FARMWORLD = PREFIX_GENERAL + "Warping to the farmworld...";
+    public static final String PREFIX_ALERT = "&c[&4&lALERT&c] ";
 
 }

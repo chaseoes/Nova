@@ -3,6 +3,8 @@ package com.gameaurora.nova.modules.cloudmessages;
 import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 
 import org.bukkit.entity.Player;
@@ -11,6 +13,7 @@ import org.bukkit.plugin.messaging.PluginMessageListener;
 import com.gameaurora.nova.Nova;
 import com.gameaurora.nova.events.CloudMessageReceiveEvent;
 import com.gameaurora.nova.modules.menu.PlayerCountUtilities;
+import com.gameaurora.nova.utilities.bungee.BungeeOnlinePlayerStorage;
 
 public class CloudMessageReceiveListener implements PluginMessageListener {
 
@@ -46,10 +49,16 @@ public class CloudMessageReceiveListener implements PluginMessageListener {
                     try {
                         String server = in.readUTF();
                         int playerCount = in.readInt();
-                        PlayerCountUtilities.setPlayerCount(server, playerCount);
+                        PlayerCountUtilities.setPlayerCount(server.toLowerCase().trim(), playerCount);
                     } catch (Exception e) {
                         // What the fuck?
                     }
+                }
+
+                if (subchannel.equals("PlayerList")) {
+                    String server = in.readUTF();
+                    String playerList = in.readUTF();
+                    BungeeOnlinePlayerStorage.setOnlinePlayers(server.trim(), new HashSet<String>(Arrays.asList(playerList.split(", "))));
                 }
             } catch (Exception e) {
                 e.printStackTrace(); // There was an error! D:
@@ -58,5 +67,4 @@ public class CloudMessageReceiveListener implements PluginMessageListener {
             alreadyReceived.add(message);
         }
     }
-
 }

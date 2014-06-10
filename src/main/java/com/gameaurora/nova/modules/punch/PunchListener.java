@@ -16,49 +16,50 @@ import org.bukkit.util.Vector;
 
 import com.gameaurora.nova.Nova;
 import com.gameaurora.nova.NovaMessages;
+import com.gameaurora.nova.utilities.GeneralUtilities;
 
 public class PunchListener implements Listener {
 
-	public static List<String> cantUse = new ArrayList<String>();
+    public static List<String> cantUse = new ArrayList<String>();
 
-	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = false)
-	public void onPlayerHitEvent(EntityDamageByEntityEvent event) {
-		Entity attacker = event.getDamager();
-		if (event.getEntity().getWorld().getName().equals("lobby") && attacker instanceof Arrow) {
-			attacker.remove();
-			event.setCancelled(true);
-		}
-		
-		if(attacker instanceof Player && event.getEntity() instanceof Player) {
-			Player player = (Player) attacker;
-			if (player.getLocation().getWorld().getName().equals("lobby")) {
-				if (player.hasPermission("nova.launch")) {
-					if (((Player) event.getEntity()).hasPermission("nova.launchable")) {
-						if (!cantUse.contains(player.getName())) {
-							Nova.getInstance().getServer().broadcastMessage(NovaMessages.PREFIX_GENERAL + ChatColor.GREEN + player.getName() + ChatColor.GRAY + " punched " + ChatColor.GREEN + ((Player) event.getEntity()).getName() + ChatColor.GRAY + " into the air!");
-							for (Player onlinePlayer : Nova.getInstance().getServer().getOnlinePlayers()) {
-								onlinePlayer.playSound(event.getEntity().getLocation(), Sound.EXPLODE, 1, 1);
-							}
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = false)
+    public void onPlayerHitEvent(EntityDamageByEntityEvent event) {
+        Entity attacker = event.getDamager();
+        if (event.getEntity().getWorld().getName().equals("lobby") && attacker instanceof Arrow) {
+            attacker.remove();
+            event.setCancelled(true);
+        }
 
-							event.getEntity().setVelocity(new Vector(event.getEntity().getVelocity().getX(), 7.0D, event.getEntity().getVelocity().getZ()));
+        if (attacker instanceof Player && event.getEntity() instanceof Player) {
+            Player player = (Player) attacker;
+            if (player.getLocation().getWorld().getName().equals("lobby") || GeneralUtilities.getServerName().equalsIgnoreCase("creative") || GeneralUtilities.getServerName().equalsIgnoreCase("buildteam") || GeneralUtilities.getServerName().equalsIgnoreCase("sandbox")) {
+                if (player.hasPermission("nova.launch")) {
+                    if (((Player) event.getEntity()).hasPermission("nova.launchable")) {
+                        if (!cantUse.contains(player.getName())) {
+                            Nova.getInstance().getServer().broadcastMessage(NovaMessages.PREFIX_GENERAL + ChatColor.GREEN + player.getName() + ChatColor.GRAY + " punched " + ChatColor.GREEN + ((Player) event.getEntity()).getName() + ChatColor.GRAY + " into the air!");
+                            for (Player onlinePlayer : Nova.getInstance().getServer().getOnlinePlayers()) {
+                                onlinePlayer.playSound(event.getEntity().getLocation(), Sound.EXPLODE, 1, 1);
+                            }
 
-							final String playerName = player.getName();
-							cantUse.add(playerName);
+                            event.getEntity().setVelocity(new Vector(event.getEntity().getVelocity().getX(), 7.0D, event.getEntity().getVelocity().getZ()));
 
-							Nova.getInstance().getServer().getScheduler().runTaskLater(Nova.getInstance(), new Runnable() {
-								public void run() {
-									cantUse.remove(playerName);
+                            final String playerName = player.getName();
+                            cantUse.add(playerName);
 
-								}
-							}, 6000L);
-						} else {
-							player.sendMessage(NovaMessages.PREFIX_ERROR + "You must wait 5 minutes before using that again!");
-						}
-					}
-				}
-				event.setCancelled(true);
-			}
-		}
-	}
+                            Nova.getInstance().getServer().getScheduler().runTaskLater(Nova.getInstance(), new Runnable() {
+                                public void run() {
+                                    cantUse.remove(playerName);
+
+                                }
+                            }, 6000L);
+                        } else {
+                            player.sendMessage(NovaMessages.PREFIX_ERROR + "You must wait 5 minutes before using that again!");
+                        }
+                    }
+                }
+                event.setCancelled(true);
+            }
+        }
+    }
 
 }

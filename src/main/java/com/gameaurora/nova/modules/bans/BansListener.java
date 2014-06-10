@@ -1,4 +1,4 @@
-package com.gameaurora.modules.bans;
+package com.gameaurora.nova.modules.bans;
 
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;

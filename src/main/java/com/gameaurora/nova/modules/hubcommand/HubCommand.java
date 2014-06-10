@@ -27,7 +27,7 @@ public class HubCommand implements CommandExecutor {
         }
 
         String server = GeneralUtilities.getServerName();
-        if (server.equalsIgnoreCase("survival")) {
+        if (server.equalsIgnoreCase("survival") || server.equalsIgnoreCase("creative") || server.equalsIgnoreCase("buildteam") || server.equalsIgnoreCase("sandbox")) {
             if (!string.startsWith("h")) {
                 player.performCommand("mvspawn");
                 return true;

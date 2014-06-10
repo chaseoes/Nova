@@ -27,7 +27,8 @@ public class TeleportCommand implements CommandExecutor {
             }
 
             if (!cs.hasPermission("nova.tp")) {
-                cs.sendMessage(NovaMessages.NO_PERMISSION);
+                cs.sendMessage(NovaMessages.PREFIX_GENERAL + "You must be " + ChatColor.GREEN + "VIP" + ChatColor.GRAY + " or above to do that!");
+                cs.sendMessage(NovaMessages.PREFIX_GENERAL + "Buy a rank here: " + ChatColor.AQUA + "http://gameaurora.com/store");
                 return true;
             }
 

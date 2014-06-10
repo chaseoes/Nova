@@ -12,38 +12,45 @@ import org.bukkit.entity.Player;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import com.gameaurora.modules.autosave.AutosaveTask;
-import com.gameaurora.modules.bans.BanCommand;
-import com.gameaurora.modules.bans.BanUtilities;
-import com.gameaurora.modules.bans.BansListener;
-import com.gameaurora.modules.bans.IsBannedCommand;
-import com.gameaurora.modules.bans.UnbanCommand;
 import com.gameaurora.nova.events.listeners.RegionEventListeners;
+import com.gameaurora.nova.general.GeneralTabCompletor;
 import com.gameaurora.nova.modules.adminmode.AdminModeCommand;
 import com.gameaurora.nova.modules.adminmode.AdminModeListeners;
 import com.gameaurora.nova.modules.adminmode.AdminModeTask;
 import com.gameaurora.nova.modules.announcer.AnnouncerTask;
 import com.gameaurora.nova.modules.arrowtp.ArrowTeleportListeners;
+import com.gameaurora.nova.modules.autosave.AutosaveTask;
+import com.gameaurora.nova.modules.bans.BanCommand;
+import com.gameaurora.nova.modules.bans.BanUtilities;
+import com.gameaurora.nova.modules.bans.BansListener;
+import com.gameaurora.nova.modules.bans.IsBannedCommand;
+import com.gameaurora.nova.modules.bans.UnbanCommand;
 import com.gameaurora.nova.modules.blockcommands.BlockCommandsCommands;
 import com.gameaurora.nova.modules.blockcommands.BlockCommandsListeners;
+import com.gameaurora.nova.modules.broadcast.BroadcastCommand;
 import com.gameaurora.nova.modules.broadcastfirstjoin.FirstJoinListener;
 import com.gameaurora.nova.modules.chat.ChatCommands;
 import com.gameaurora.nova.modules.chat.ChatData;
 import com.gameaurora.nova.modules.chat.ChatListeners;
+import com.gameaurora.nova.modules.chat.ChatUtilities;
 import com.gameaurora.nova.modules.cloudmessages.CloudMessageListeners;
 import com.gameaurora.nova.modules.cloudmessages.CloudMessageReceiveListener;
 import com.gameaurora.nova.modules.commandshortcuts.CommandShortcutListener;
 import com.gameaurora.nova.modules.creativepass.CreativePassListener;
+import com.gameaurora.nova.modules.farmworld.FarmworldCommands;
+import com.gameaurora.nova.modules.farmworld.FarmworldListeners;
 import com.gameaurora.nova.modules.hidestream.HideStreamListener;
 import com.gameaurora.nova.modules.hubcommand.HubCommand;
 import com.gameaurora.nova.modules.joinspawn.JoinSpawnListener;
 import com.gameaurora.nova.modules.kick.KickCommand;
+import com.gameaurora.nova.modules.locate.LocateCommand;
 import com.gameaurora.nova.modules.logger.LogListener;
 import com.gameaurora.nova.modules.maintenancemode.MaintenanceModeTask;
 import com.gameaurora.nova.modules.menu.MenuListeners;
 import com.gameaurora.nova.modules.menu.MenuUtilities;
 import com.gameaurora.nova.modules.menu.PlayerCountUtilities;
 import com.gameaurora.nova.modules.menu.ServerMenuCommand;
+import com.gameaurora.nova.modules.nametags.ScoreboardListeners;
 import com.gameaurora.nova.modules.nametags.ServerScoreboard;
 import com.gameaurora.nova.modules.onlyproxyjoin.OnlyProxyJoinListener;
 import com.gameaurora.nova.modules.pads.PadCommands;
@@ -57,14 +64,13 @@ import com.gameaurora.nova.modules.signlinks.SignLinkListener;
 import com.gameaurora.nova.modules.superspeed.SuperSpeedListener;
 import com.gameaurora.nova.modules.teleport.TeleportCommand;
 import com.gameaurora.nova.modules.teleport.TeleportData;
-import com.gameaurora.nova.modules.tokens.TokenCommands;
-import com.gameaurora.nova.modules.tokens.TokenData;
-import com.gameaurora.nova.modules.tokens.TokenDataFile;
-import com.gameaurora.nova.modules.tokens.TokenListeners;
+import com.gameaurora.nova.modules.tnt.TNTListener;
 import com.gameaurora.nova.modules.votifier.VoteListener;
+import com.gameaurora.nova.utilities.GeneralUtilities;
 import com.gameaurora.nova.utilities.PlayerStateStorage;
 import com.gameaurora.nova.utilities.SQLUtilities;
 import com.gameaurora.nova.utilities.SerializableLocation;
+import com.gameaurora.nova.utilities.bungee.BungeeOnlinePlayerStorage;
 import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
 
 // TODO: getPlayer is deprecated. :(
@@ -74,6 +80,7 @@ public class Nova extends JavaPlugin {
     private static Nova instance;
     public List<String> adminPlayers = new ArrayList<String>();
     public HashMap<String, PlayerStateStorage> adminPlayerStates = new HashMap<String, PlayerStateStorage>();
+    public HashMap<String, ServerScoreboard> playerScoreboards = new HashMap<String, ServerScoreboard>();
     public TeleportData teleportData;
     public ChatData chatData;
     private SQLUtilities sql;
@@ -108,6 +115,18 @@ public class Nova extends JavaPlugin {
         getServer().getMessenger().registerIncomingPluginChannel(this, "BungeeCord", new CloudMessageReceiveListener());
         loadModules();
 
+        getServer().getScheduler().runTaskTimer(this, new Runnable() {
+            public void run() {
+                BungeeOnlinePlayerStorage.refreshOnlinePlayers();
+                for (Player player : getServer().getOnlinePlayers()) {
+                    ServerScoreboard scoreboard = playerScoreboards.containsKey(player.getName()) ? playerScoreboards.get(player.getName()) : new ServerScoreboard(player);
+                    playerScoreboards.remove(player.getName());
+                    playerScoreboards.put(player.getName(), scoreboard);
+                    scoreboard.updateBoard();
+                }
+            }
+        }, 0L, 40L);
+
         loadLobbyLocation();
 
         for (String server : MenuUtilities.icons.keySet()) {
@@ -131,7 +150,7 @@ public class Nova extends JavaPlugin {
     }
 
     public void onDisable() {
-        for (String s : adminPlayers) {
+        for (String s : GeneralUtilities.makeCopy(adminPlayers)) {
             Player player = getServer().getPlayerExact(s);
             if (player != null) {
                 String[] str = null;
@@ -154,6 +173,10 @@ public class Nova extends JavaPlugin {
                 cs.sendMessage(NovaMessages.PREFIX_GENERAL + getDescription().getName() + " version " + ChatColor.GREEN + getDescription().getVersion() + ChatColor.GRAY + " by chaseoes.");
                 cs.sendMessage(NovaMessages.PREFIX_GENERAL + "http://gameaurora.com");
                 return true;
+            }
+
+            if (strings[0].equalsIgnoreCase("po")) {
+                cs.sendMessage(BungeeOnlinePlayerStorage.getOnlinePlayers().toString() + " " + BungeeOnlinePlayerStorage.getPlayerCount() + " " + BungeeOnlinePlayerStorage.getPlayerCount("skyblock") + " " + BungeeOnlinePlayerStorage.getPlayerCount("survival"));
             }
 
             if (strings[0].equalsIgnoreCase("getpos")) {
@@ -217,6 +240,7 @@ public class Nova extends JavaPlugin {
             chatData.reloadProfiles();
             pm.registerEvents(new ChatListeners(), this);
             getCommand("clearchat").setExecutor(new ChatCommands());
+            ChatUtilities.loadBannedWords();
         }
 
         if (moduleIsEnabled("signcolors")) {
@@ -255,6 +279,7 @@ public class Nova extends JavaPlugin {
             getCommand("unban").setExecutor(new UnbanCommand());
             getCommand("isbanned").setExecutor(new IsBannedCommand());
             getServer().getPluginManager().registerEvents(new BansListener(), this);
+            getCommand("ban").setTabCompleter(new GeneralTabCompletor());
         }
 
         if (moduleIsEnabled("menu")) {
@@ -275,19 +300,13 @@ public class Nova extends JavaPlugin {
             pm.registerEvents(new ArrowTeleportListeners(), this);
         }
 
-        if (moduleIsEnabled("tokens")) {
-            TokenDataFile.reloadDataFile();
-            TokenData.load();
-            getCommand("tokens").setExecutor(new TokenCommands());
-            pm.registerEvents(new TokenListeners(), this);
-        }
-
         if (moduleIsEnabled("superspeed")) {
             pm.registerEvents(new SuperSpeedListener(), this);
         }
 
         if (moduleIsEnabled("kick")) {
             getCommand("kick").setExecutor(new KickCommand());
+            getCommand("kick").setTabCompleter(new GeneralTabCompletor());
         }
 
         if (moduleIsEnabled("blockcommands")) {
@@ -310,6 +329,7 @@ public class Nova extends JavaPlugin {
         if (moduleIsEnabled("nametags")) {
             for (Player player : getServer().getOnlinePlayers()) {
                 ServerScoreboard board = new ServerScoreboard(player);
+                pm.registerEvents(new ScoreboardListeners(), this);
                 board.updateBoard();
             }
         }
@@ -321,6 +341,7 @@ public class Nova extends JavaPlugin {
         if (moduleIsEnabled("privatemessages")) {
             getCommand("message").setExecutor(new MessageCommands());
             getCommand("reply").setExecutor(new MessageCommands());
+            getCommand("message").setTabCompleter(new GeneralTabCompletor());
         }
 
         if (moduleIsEnabled("broadcastfirstjoin")) {
@@ -333,6 +354,24 @@ public class Nova extends JavaPlugin {
 
         if (moduleIsEnabled("votifier")) {
             pm.registerEvents(new VoteListener(), this);
+        }
+
+        if (moduleIsEnabled("farmworld")) {
+            pm.registerEvents(new FarmworldListeners(), this);
+            getCommand("farmworld").setExecutor(new FarmworldCommands());
+        }
+
+        if (moduleIsEnabled("locate")) {
+            getCommand("locate").setExecutor(new LocateCommand());
+            getCommand("locate").setTabCompleter(new GeneralTabCompletor());
+        }
+
+        if (moduleIsEnabled("broadcast")) {
+            getCommand("broadcast").setExecutor(new BroadcastCommand());
+        }
+
+        if (moduleIsEnabled("tnt")) {
+            pm.registerEvents(new TNTListener(), this);
         }
     }
 
