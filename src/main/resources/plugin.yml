@@ -84,4 +84,34 @@ commands:
   broadcast:
     description: Broadcast!
     usage: /<command> [args]
-    
+  help:
+    description: Help!
+    usage: /<command> [args]
+  vote:
+    description: Vote!
+    usage: /<command> [args]
+  member:
+    description: Member!
+    usage: /<command> [args]
+  rules:
+    description: Rules!
+    usage: /<command> [args]
+  tos:
+    description: TOS!
+    usage: /<command> [args]
+  privacy:
+    description: Privacy!
+    usage: /<command> [args]
+  store:
+    description: Store!
+    usage: /<command> [args]
+    aliases: [buy]
+  livemap:
+    description: Livemap!
+    usage: /<command> [args]
+  mumble:
+    description: Mumble!
+    usage: /<command> [args]
+  chat:
+    description: Chat!
+    usage: /<command> [args]

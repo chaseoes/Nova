@@ -35,6 +35,8 @@ modules:
 - farmworld
 - locate
 - tnt
+- infocommands
+- emptybroadcast
 server-name: undefined
 pretty-server-name: Undefined
 command-shortcuts:

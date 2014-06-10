@@ -36,9 +36,9 @@ public class MessageCommands implements CommandExecutor {
                         toName = to.getName();
                     }
 
-                    ChatUtilities.buildFancyChatMessage(ChatColor.GREEN + "(To %1$s)" + ChatColor.WHITE + ": %2$s", toName, message, AuroraServer.valueOf(BungeeOnlinePlayerStorage.getCurrentServer(toName).toUpperCase()).getPrettyName()).send((Player) cs);
+                    ChatUtilities.buildFancyChatMessage(ChatColor.GREEN + "(To %1$s)" + ChatColor.WHITE + ": %2$s", toName, message, AuroraServer.valueOf(BungeeOnlinePlayerStorage.getCurrentServer(toName).toUpperCase()).getPrettyName(), (Player) cs).send((Player) cs);
                     if (to != null) {
-                        ChatUtilities.buildFancyChatMessage(ChatColor.GREEN + "(From %1$s)" + ChatColor.WHITE + ": %2$s", cs.getName(), message, GeneralUtilities.getPrettyServerName()).send(to);
+                        ChatUtilities.buildFancyChatMessage(ChatColor.GREEN + "(From %1$s)" + ChatColor.WHITE + ": %2$s", cs.getName(), message, GeneralUtilities.getPrettyServerName(), to).send(to);
                     } else {
                         CloudMessage cm = new CloudMessage(CloudMessageUtilities.createPrivateMessageString(message, cs.getName(), toName), CloudMessageType.PRIVATE_MESSAGE.toString(), GeneralUtilities.getServerName(), GeneralUtilities.getPrettyServerName());
                         cm.send();

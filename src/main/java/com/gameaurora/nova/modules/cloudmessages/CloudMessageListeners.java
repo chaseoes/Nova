@@ -24,9 +24,9 @@ public class CloudMessageListeners implements Listener {
         CloudMessage message = event.getMessage();
         if (message.getMessageType() == CloudMessageType.CHAT) {
             String[] splitMessage = message.getMessage().split("\\|");
-            FancyMessage fm = ChatUtilities.buildFancyChatMessage(splitMessage[0], splitMessage[1], splitMessage[2], message.getSender().getPrettyName());
 
             for (Player player : Nova.getInstance().getServer().getOnlinePlayers()) {
+                FancyMessage fm = ChatUtilities.buildFancyChatMessage(splitMessage[0], splitMessage[1], splitMessage[2], message.getSender().getPrettyName(), player);
                 if (!player.hasMetadata("nova.cloudchat.disabled")) {
                     fm.send(player);
                 }
@@ -37,7 +37,7 @@ public class CloudMessageListeners implements Listener {
             String[] splitMessage = message.getMessage().split("\\|");
             Player player = Nova.getInstance().getServer().getPlayer(splitMessage[2]);
             if (player != null) {
-                ChatUtilities.buildFancyChatMessage(ChatColor.GREEN + "(From %1$s)" + ChatColor.WHITE + ": %2$s", splitMessage[1], splitMessage[0], message.getSender().getPrettyName()).send(player);
+                ChatUtilities.buildFancyChatMessage(ChatColor.GREEN + "(From %1$s)" + ChatColor.WHITE + ": %2$s", splitMessage[1], splitMessage[0], message.getSender().getPrettyName(), player).send(player);
 
                 if (MessageCommands.lastMessaged.containsKey(player.getName())) {
                     MessageCommands.lastMessaged.remove(player.getName());

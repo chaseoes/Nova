@@ -37,10 +37,12 @@ import com.gameaurora.nova.modules.cloudmessages.CloudMessageListeners;
 import com.gameaurora.nova.modules.cloudmessages.CloudMessageReceiveListener;
 import com.gameaurora.nova.modules.commandshortcuts.CommandShortcutListener;
 import com.gameaurora.nova.modules.creativepass.CreativePassListener;
+import com.gameaurora.nova.modules.emptybroadcast.EmptyBroadcastListener;
 import com.gameaurora.nova.modules.farmworld.FarmworldCommands;
 import com.gameaurora.nova.modules.farmworld.FarmworldListeners;
 import com.gameaurora.nova.modules.hidestream.HideStreamListener;
 import com.gameaurora.nova.modules.hubcommand.HubCommand;
+import com.gameaurora.nova.modules.infocommands.InfoCommands;
 import com.gameaurora.nova.modules.joinspawn.JoinSpawnListener;
 import com.gameaurora.nova.modules.kick.KickCommand;
 import com.gameaurora.nova.modules.locate.LocateCommand;
@@ -118,14 +120,14 @@ public class Nova extends JavaPlugin {
         getServer().getScheduler().runTaskTimer(this, new Runnable() {
             public void run() {
                 BungeeOnlinePlayerStorage.refreshOnlinePlayers();
-                for (Player player : getServer().getOnlinePlayers()) {
-                    ServerScoreboard scoreboard = playerScoreboards.containsKey(player.getName()) ? playerScoreboards.get(player.getName()) : new ServerScoreboard(player);
-                    playerScoreboards.remove(player.getName());
-                    playerScoreboards.put(player.getName(), scoreboard);
-                    scoreboard.updateBoard();
-                }
+                // for (Player player : getServer().getOnlinePlayers()) {
+                // ServerScoreboard scoreboard = playerScoreboards.containsKey(player.getName()) ? playerScoreboards.get(player.getName()) : new ServerScoreboard(player);
+                // playerScoreboards.remove(player.getName());
+                // playerScoreboards.put(player.getName(), scoreboard);
+                // scoreboard.updateBoard();
+                // }
             }
-        }, 0L, 40L);
+        }, 0L, 120L);
 
         loadLobbyLocation();
 
@@ -240,6 +242,7 @@ public class Nova extends JavaPlugin {
             chatData.reloadProfiles();
             pm.registerEvents(new ChatListeners(), this);
             getCommand("clearchat").setExecutor(new ChatCommands());
+            getCommand("chat").setExecutor(new ChatCommands());
             ChatUtilities.loadBannedWords();
         }
 
@@ -372,6 +375,22 @@ public class Nova extends JavaPlugin {
 
         if (moduleIsEnabled("tnt")) {
             pm.registerEvents(new TNTListener(), this);
+        }
+
+        if (moduleIsEnabled("infocommands")) {
+            getCommand("help").setExecutor(new InfoCommands());
+            getCommand("vote").setExecutor(new InfoCommands());
+            getCommand("member").setExecutor(new InfoCommands());
+            getCommand("rules").setExecutor(new InfoCommands());
+            getCommand("tos").setExecutor(new InfoCommands());
+            getCommand("privacy").setExecutor(new InfoCommands());
+            getCommand("livemap").setExecutor(new InfoCommands());
+            getCommand("store").setExecutor(new InfoCommands());
+            getCommand("mumble").setExecutor(new InfoCommands());
+        }
+
+        if (moduleIsEnabled("emptybroadcast")) {
+            pm.registerEvents(new EmptyBroadcastListener(), this);
         }
     }
 

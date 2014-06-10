@@ -53,7 +53,7 @@ public class ChatListeners implements Listener {
                         }
                     }
 
-                    if ((event.getMessage().contains("http") || event.getMessage().contains("www.") || event.getMessage().contains(".com") || event.getMessage().contains(".net") || event.getMessage().contains(".org")) && !event.getMessage().contains("gameaurora") && !player.hasPermission("nova.url")) {
+                    if ((event.getMessage().toLowerCase().contains("http") || event.getMessage().toLowerCase().contains("www.") || event.getMessage().toLowerCase().contains(".com") || event.getMessage().toLowerCase().contains(".net") || event.getMessage().toLowerCase().contains(".org")) && !event.getMessage().toLowerCase().contains("gameaurora") && !player.hasPermission("nova.url")) {
                         player.sendMessage(NovaMessages.PREFIX_ERROR + "You are not to post links!");
                         event.setCancelled(true);
                         return;
@@ -70,7 +70,9 @@ public class ChatListeners implements Listener {
 
                     event.setFormat(profile.getChatFormat());
                     event.setCancelled(true);
-                    ChatUtilities.buildFancyChatMessage(event.getFormat(), player.getName(), event.getMessage(), GeneralUtilities.getPrettyServerName()).send(event.getRecipients());
+                    for (Player toPlayer : event.getRecipients()) {
+                        ChatUtilities.buildFancyChatMessage(event.getFormat(), player.getName(), event.getMessage(), GeneralUtilities.getPrettyServerName(), toPlayer).send(toPlayer);
+                    }
                 } else {
                     Nova.getInstance().getServer().getScheduler().runTask(Nova.getInstance(), new Runnable() {
                         public void run() {

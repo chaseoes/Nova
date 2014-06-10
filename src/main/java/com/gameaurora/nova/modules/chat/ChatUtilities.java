@@ -6,6 +6,7 @@ import java.util.List;
 import mkremins.fanciful.FancyMessage;
 
 import org.bukkit.ChatColor;
+import org.bukkit.entity.Player;
 
 import com.gameaurora.nova.utilities.GeneralUtilities;
 
@@ -36,12 +37,17 @@ public class ChatUtilities {
         return false;
     }
 
-    public static final FancyMessage buildFancyChatMessage(String format, String playerName, String message, String prettyServerName) {
+    public static final FancyMessage buildFancyChatMessage(String format, String playerName, String message, String prettyServerName, Player displayToPlayer) {
         String[] finalMessage = String.format(format, playerName, message).split(":");
         FancyMessage fm = new FancyMessage(ChatColor.translateAlternateColorCodes('&', finalMessage[0]) + ChatColor.WHITE + ": ");
         ChatColor color = (format.split(":")[1].contains("c")) ? ChatColor.RED : ChatColor.WHITE;
         String server = (prettyServerName.equalsIgnoreCase(GeneralUtilities.getPrettyServerName())) ? playerName + " is on the same server as you!" : GeneralUtilities.punctuateName(playerName) + " Current Server: " + ChatColor.AQUA + prettyServerName;
-        fm = fm.tooltip(ChatColor.GREEN + server).then(message).color(color);
+
+        if (displayToPlayer.hasPermission("nova.chatmod")) {
+            fm = fm.tooltip(ChatColor.GREEN + server).then(message).tooltip(ChatColor.GRAY + "Click here to open the options for this message.").command("/chat " + playerName).color(color);
+        } else {
+            fm = fm.tooltip(ChatColor.GREEN + server).then(message).color(color);
+        }
         return fm;
     }
 
