@@ -43,11 +43,11 @@ public class ChatUtilities {
         ChatColor color = (format.split(":")[1].contains("c")) ? ChatColor.RED : ChatColor.WHITE;
         String server = (prettyServerName.equalsIgnoreCase(GeneralUtilities.getPrettyServerName())) ? playerName + " is on the same server as you!" : GeneralUtilities.punctuateName(playerName) + " Current Server: " + ChatColor.AQUA + prettyServerName;
 
-        if (displayToPlayer.hasPermission("nova.chatmod")) {
-            fm = fm.tooltip(ChatColor.GREEN + server).then(message).tooltip(ChatColor.GRAY + "Click here to open the options for this message.").command("/chat " + playerName).color(color);
-        } else {
-            fm = fm.tooltip(ChatColor.GREEN + server).then(message).color(color);
-        }
+        // if (displayToPlayer.hasPermission("nova.chatmod")) {
+        // fm = fm.tooltip(ChatColor.GREEN + server).then(message).tooltip(ChatColor.GRAY + "Click here to open the options for this message.").command("/chat " + playerName).color(color);
+        // } else {
+        fm = fm.tooltip(ChatColor.GREEN + server).then(message).color(color);
+        // }
         return fm;
     }
 
@@ -58,6 +58,7 @@ public class ChatUtilities {
         bannedWords.add("whore");
         bannedWords.add("faggot");
         bannedWords.add("nigga");
+        bannedWords.add("niqqa");
         bannedWords.add("nigger");
         bannedWords.add("queer");
         bannedWords.add("penis");
@@ -72,7 +73,6 @@ public class ChatUtilities {
         bannedWords.add("retarded");
         bannedWords.add("incest");
         bannedWords.add("shit");
-        bannedWords.add("ass");
     }
 
 }

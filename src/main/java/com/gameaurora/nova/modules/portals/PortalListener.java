@@ -9,12 +9,12 @@ import com.gameaurora.nova.utilities.BungeeUtilities;
 
 public class PortalListener implements Listener {
 
-	@EventHandler(priority = EventPriority.HIGHEST)
-	public void onRegionEnter(RegionEnterEvent event) {
-		if (event.getRegionName().startsWith("server-")) {
-			String server = event.getRegionName().replace("server-", "");
-			BungeeUtilities.sendToServer(event.getPlayer(), server);
-		}
-	}
+    @EventHandler(priority = EventPriority.HIGHEST)
+    public void onRegionEnter(RegionEnterEvent event) {
+        if (event.getRegionName().startsWith("server-")) {
+            String server = event.getRegionName().split("-")[1];
+            BungeeUtilities.sendToServer(event.getPlayer(), server);
+        }
+    }
 
 }

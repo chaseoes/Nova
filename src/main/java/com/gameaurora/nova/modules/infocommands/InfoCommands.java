@@ -1,10 +1,14 @@
 package com.gameaurora.nova.modules.infocommands;
 
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 
+import com.gameaurora.nova.Nova;
 import com.gameaurora.nova.NovaMessages;
 import com.gameaurora.nova.utilities.GeneralUtilities;
 
@@ -46,8 +50,23 @@ public class InfoCommands implements CommandExecutor {
         }
 
         if (cmnd.getName().equalsIgnoreCase("vote")) {
+            if (GeneralUtilities.getServerName().equalsIgnoreCase("hub")) {
+                cs.sendMessage(NovaMessages.BAR);
+            }
+
             cs.sendMessage(NovaMessages.PREFIX_GENERAL + "Click on the following URL to vote for us:");
             cs.sendMessage(NovaMessages.PREFIX_GENERAL + ChatColor.AQUA + "http://gameaurora.com/vote");
+
+            if (GeneralUtilities.getServerName().equalsIgnoreCase("hub")) {
+                cs.sendMessage(NovaMessages.BAR);
+                String user = cs.getName().trim().toLowerCase();
+                String month = new SimpleDateFormat("MMM").format(Calendar.getInstance().getTime()).toLowerCase();
+                String path = "votes." + month + "." + user;
+                int votes = Nova.getInstance().getConfig().getString(path) != null ? Nova.getInstance().getConfig().getInt(path) : 0;
+                cs.sendMessage(ChatColor.GREEN + "You have voted " + ChatColor.AQUA + votes + ChatColor.GREEN + " times this month.");
+                cs.sendMessage(ChatColor.GRAY + "Remember to spell your username properly (it is case-sensitive) to have your votes count.");
+                cs.sendMessage(NovaMessages.BAR);
+            }
         }
 
         if (cmnd.getName().equalsIgnoreCase("member")) {

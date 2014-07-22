@@ -55,8 +55,12 @@ public class CloudMessage {
                     out.writeShort(msgbytes.toByteArray().length);
                     out.write(msgbytes.toByteArray());
 
-                    Player p = Nova.getInstance().getServer().getOnlinePlayers()[0];
-                    p.sendPluginMessage(Nova.getInstance(), "BungeeCord", b.toByteArray());
+                    try {
+                        Player p = Nova.getInstance().getServer().getOnlinePlayers()[0];
+                        p.sendPluginMessage(Nova.getInstance(), "BungeeCord", b.toByteArray());
+                    } catch (Exception e) {
+
+                    }
                 } catch (Exception e) {
                     e.printStackTrace(); // OOPS! D:
                 }

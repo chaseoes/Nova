@@ -13,18 +13,12 @@ import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import com.gameaurora.nova.events.listeners.RegionEventListeners;
-import com.gameaurora.nova.general.GeneralTabCompletor;
 import com.gameaurora.nova.modules.adminmode.AdminModeCommand;
 import com.gameaurora.nova.modules.adminmode.AdminModeListeners;
 import com.gameaurora.nova.modules.adminmode.AdminModeTask;
 import com.gameaurora.nova.modules.announcer.AnnouncerTask;
 import com.gameaurora.nova.modules.arrowtp.ArrowTeleportListeners;
 import com.gameaurora.nova.modules.autosave.AutosaveTask;
-import com.gameaurora.nova.modules.bans.BanCommand;
-import com.gameaurora.nova.modules.bans.BanUtilities;
-import com.gameaurora.nova.modules.bans.BansListener;
-import com.gameaurora.nova.modules.bans.IsBannedCommand;
-import com.gameaurora.nova.modules.bans.UnbanCommand;
 import com.gameaurora.nova.modules.blockcommands.BlockCommandsCommands;
 import com.gameaurora.nova.modules.blockcommands.BlockCommandsListeners;
 import com.gameaurora.nova.modules.broadcast.BroadcastCommand;
@@ -45,7 +39,7 @@ import com.gameaurora.nova.modules.hubcommand.HubCommand;
 import com.gameaurora.nova.modules.infocommands.InfoCommands;
 import com.gameaurora.nova.modules.joinspawn.JoinSpawnListener;
 import com.gameaurora.nova.modules.kick.KickCommand;
-import com.gameaurora.nova.modules.locate.LocateCommand;
+import com.gameaurora.nova.modules.lagtest.LagTestTask;
 import com.gameaurora.nova.modules.logger.LogListener;
 import com.gameaurora.nova.modules.maintenancemode.MaintenanceModeTask;
 import com.gameaurora.nova.modules.menu.MenuListeners;
@@ -54,12 +48,10 @@ import com.gameaurora.nova.modules.menu.PlayerCountUtilities;
 import com.gameaurora.nova.modules.menu.ServerMenuCommand;
 import com.gameaurora.nova.modules.nametags.ScoreboardListeners;
 import com.gameaurora.nova.modules.nametags.ServerScoreboard;
-import com.gameaurora.nova.modules.onlyproxyjoin.OnlyProxyJoinListener;
 import com.gameaurora.nova.modules.pads.PadCommands;
 import com.gameaurora.nova.modules.pads.PadListener;
 import com.gameaurora.nova.modules.pingchat.PingChatListener;
 import com.gameaurora.nova.modules.portals.PortalListener;
-import com.gameaurora.nova.modules.privatemessages.MessageCommands;
 import com.gameaurora.nova.modules.punch.PunchListener;
 import com.gameaurora.nova.modules.signcolors.SignColorListener;
 import com.gameaurora.nova.modules.signlinks.SignLinkListener;
@@ -72,7 +64,6 @@ import com.gameaurora.nova.utilities.GeneralUtilities;
 import com.gameaurora.nova.utilities.PlayerStateStorage;
 import com.gameaurora.nova.utilities.SQLUtilities;
 import com.gameaurora.nova.utilities.SerializableLocation;
-import com.gameaurora.nova.utilities.bungee.BungeeOnlinePlayerStorage;
 import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
 
 // TODO: getPlayer is deprecated. :(
@@ -87,7 +78,6 @@ public class Nova extends JavaPlugin {
     public ChatData chatData;
     private SQLUtilities sql;
     public static Location LOBBY_LOCATION;
-    public static final String CHANNEL_SEPARATOR = "AABBCCDDEEZ";
     private WorldGuardPlugin worldGuard;
 
     public static Nova getInstance() {
@@ -101,10 +91,6 @@ public class Nova extends JavaPlugin {
         teleportData = new TeleportData();
         chatData = new ChatData();
 
-        if (moduleIsEnabled("bans")) {
-            sql = new SQLUtilities(this);
-        }
-
         getServer().getScheduler().runTaskLater(this, new Runnable() {
             public void run() {
                 worldGuard = (WorldGuardPlugin) getServer().getPluginManager().getPlugin("WorldGuard");
@@ -116,18 +102,6 @@ public class Nova extends JavaPlugin {
         getServer().getMessenger().registerOutgoingPluginChannel(this, "BungeeCord");
         getServer().getMessenger().registerIncomingPluginChannel(this, "BungeeCord", new CloudMessageReceiveListener());
         loadModules();
-
-        getServer().getScheduler().runTaskTimer(this, new Runnable() {
-            public void run() {
-                BungeeOnlinePlayerStorage.refreshOnlinePlayers();
-                // for (Player player : getServer().getOnlinePlayers()) {
-                // ServerScoreboard scoreboard = playerScoreboards.containsKey(player.getName()) ? playerScoreboards.get(player.getName()) : new ServerScoreboard(player);
-                // playerScoreboards.remove(player.getName());
-                // playerScoreboards.put(player.getName(), scoreboard);
-                // scoreboard.updateBoard();
-                // }
-            }
-        }, 0L, 120L);
 
         loadLobbyLocation();
 
@@ -175,10 +149,6 @@ public class Nova extends JavaPlugin {
                 cs.sendMessage(NovaMessages.PREFIX_GENERAL + getDescription().getName() + " version " + ChatColor.GREEN + getDescription().getVersion() + ChatColor.GRAY + " by chaseoes.");
                 cs.sendMessage(NovaMessages.PREFIX_GENERAL + "http://gameaurora.com");
                 return true;
-            }
-
-            if (strings[0].equalsIgnoreCase("po")) {
-                cs.sendMessage(BungeeOnlinePlayerStorage.getOnlinePlayers().toString() + " " + BungeeOnlinePlayerStorage.getPlayerCount() + " " + BungeeOnlinePlayerStorage.getPlayerCount("skyblock") + " " + BungeeOnlinePlayerStorage.getPlayerCount("survival"));
             }
 
             if (strings[0].equalsIgnoreCase("getpos")) {
@@ -254,10 +224,6 @@ public class Nova extends JavaPlugin {
             pm.registerEvents(new JoinSpawnListener(), this);
         }
 
-        if (moduleIsEnabled("onlyproxyjoin")) {
-            pm.registerEvents(new OnlyProxyJoinListener(), this);
-        }
-
         if (moduleIsEnabled("hubcommand")) {
             getCommand("hub").setExecutor(new HubCommand());
         }
@@ -274,15 +240,6 @@ public class Nova extends JavaPlugin {
             getServer().getScheduler().runTaskTimer(this, new AdminModeTask(), 0L, 20L);
             getCommand("adminmode").setExecutor(new AdminModeCommand());
             pm.registerEvents(new AdminModeListeners(), this);
-        }
-
-        if (moduleIsEnabled("bans")) {
-            BanUtilities.getInstance();
-            getCommand("ban").setExecutor(new BanCommand());
-            getCommand("unban").setExecutor(new UnbanCommand());
-            getCommand("isbanned").setExecutor(new IsBannedCommand());
-            getServer().getPluginManager().registerEvents(new BansListener(), this);
-            getCommand("ban").setTabCompleter(new GeneralTabCompletor());
         }
 
         if (moduleIsEnabled("menu")) {
@@ -309,7 +266,6 @@ public class Nova extends JavaPlugin {
 
         if (moduleIsEnabled("kick")) {
             getCommand("kick").setExecutor(new KickCommand());
-            getCommand("kick").setTabCompleter(new GeneralTabCompletor());
         }
 
         if (moduleIsEnabled("blockcommands")) {
@@ -330,21 +286,11 @@ public class Nova extends JavaPlugin {
         }
 
         if (moduleIsEnabled("nametags")) {
-            for (Player player : getServer().getOnlinePlayers()) {
-                ServerScoreboard board = new ServerScoreboard(player);
-                pm.registerEvents(new ScoreboardListeners(), this);
-                board.updateBoard();
-            }
+            pm.registerEvents(new ScoreboardListeners(), this);
         }
 
         if (moduleIsEnabled("announcer")) {
             getServer().getScheduler().runTaskTimer(this, new AnnouncerTask(), 0L, 5L * 60L * 20L);
-        }
-
-        if (moduleIsEnabled("privatemessages")) {
-            getCommand("message").setExecutor(new MessageCommands());
-            getCommand("reply").setExecutor(new MessageCommands());
-            getCommand("message").setTabCompleter(new GeneralTabCompletor());
         }
 
         if (moduleIsEnabled("broadcastfirstjoin")) {
@@ -362,11 +308,6 @@ public class Nova extends JavaPlugin {
         if (moduleIsEnabled("farmworld")) {
             pm.registerEvents(new FarmworldListeners(), this);
             getCommand("farmworld").setExecutor(new FarmworldCommands());
-        }
-
-        if (moduleIsEnabled("locate")) {
-            getCommand("locate").setExecutor(new LocateCommand());
-            getCommand("locate").setTabCompleter(new GeneralTabCompletor());
         }
 
         if (moduleIsEnabled("broadcast")) {
@@ -392,6 +333,10 @@ public class Nova extends JavaPlugin {
         if (moduleIsEnabled("emptybroadcast")) {
             pm.registerEvents(new EmptyBroadcastListener(), this);
         }
+
+        if (moduleIsEnabled("lagtest")) {
+            getServer().getScheduler().runTaskTimer(this, new LagTestTask(), 0L, 20L);
+        }
     }
 
     public SQLUtilities getSQL() {
@@ -402,13 +347,17 @@ public class Nova extends JavaPlugin {
         LOBBY_LOCATION = new Location(getInstance().getServer().getWorld("lobby"), 0.5, 65, 0.5, -180, 0);
     }
 
-    public void updateScoreboard(Player player) {
-        ServerScoreboard board = new ServerScoreboard(player);
-        board.updateBoard();
-    }
-
     public WorldGuardPlugin getWorldGuard() {
         return worldGuard;
+    }
+
+    public void updateScoreboard(String playerName) {
+        for (Player player : getServer().getOnlinePlayers()) {
+            ServerScoreboard scoreboard = playerScoreboards.containsKey(player.getName()) ? playerScoreboards.get(player.getName()) : new ServerScoreboard(player);
+            playerScoreboards.remove(player.getName());
+            scoreboard.updateBoard(playerName);
+            playerScoreboards.put(player.getName(), scoreboard);
+        }
     }
 
 }

@@ -14,13 +14,17 @@ import com.gameaurora.nova.utilities.GeneralUtilities;
 
 public class BroadcastCommand implements CommandExecutor {
 
-    public boolean onCommand(CommandSender cs, Command cmnd, String string, String[] strings) {
+    public boolean onCommand(CommandSender cs, Command cmnd, String string, final String[] strings) {
         if (cs.hasPermission("nova.broadcast")) {
             if (strings.length > 0) {
-                String message = StringUtils.join(strings, " ");
-                CloudMessage cloudMessage = new CloudMessage(NovaMessages.PREFIX_ALERT + message, CloudMessageType.ALERT.toString(), GeneralUtilities.getServerName(), GeneralUtilities.getPrettyServerName());
-                Nova.getInstance().getServer().broadcastMessage(ChatColor.translateAlternateColorCodes('&', NovaMessages.PREFIX_ALERT) + message);
-                cloudMessage.send();
+                Nova.getInstance().getServer().getScheduler().runTaskLater(Nova.getInstance(), new Runnable() {
+                    public void run() {
+                        String message = StringUtils.join(strings, " ");
+                        CloudMessage cloudMessage = new CloudMessage(NovaMessages.PREFIX_ALERT + message, CloudMessageType.ALERT.toString(), GeneralUtilities.getServerName(), GeneralUtilities.getPrettyServerName());
+                        Nova.getInstance().getServer().broadcastMessage(ChatColor.translateAlternateColorCodes('&', NovaMessages.PREFIX_ALERT) + message);
+                        cloudMessage.send();
+                    }
+                }, 20L);
             } else {
                 cs.sendMessage(NovaMessages.PREFIX_ERROR + "Usage: /" + string + " <message>");
             }

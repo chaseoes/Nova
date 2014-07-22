@@ -46,6 +46,7 @@ public class MenuListeners implements Listener {
                     } else if (ChatColor.stripColor(event.getItem().getItemMeta().getDisplayName()).equals("Server Menu")) {
                         player.performCommand("s");
                     }
+
                     event.setUseInteractedBlock(Result.DENY);
                     event.setUseItemInHand(Result.DENY);
                     event.setCancelled(true);
@@ -58,7 +59,6 @@ public class MenuListeners implements Listener {
     @EventHandler(priority = EventPriority.LOWEST)
     public void onPlayerJoin(PlayerJoinEvent event) {
         Player player = event.getPlayer();
-
         if (Nova.getInstance().moduleIsEnabled("menuitem")) {
             player.getInventory().clear();
             player.getInventory().addItem(GeneralUtilities.getCustomItem(Material.COMPASS, ChatColor.AQUA + "Server Menu", ChatColor.GRAY + "Right click to open."));

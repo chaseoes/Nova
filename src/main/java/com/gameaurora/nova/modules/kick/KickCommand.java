@@ -8,10 +8,6 @@ import org.bukkit.entity.Player;
 
 import com.gameaurora.nova.Nova;
 import com.gameaurora.nova.NovaMessages;
-import com.gameaurora.nova.modules.cloudmessages.CloudMessage;
-import com.gameaurora.nova.modules.cloudmessages.CloudMessageType;
-import com.gameaurora.nova.utilities.GeneralUtilities;
-import com.gameaurora.nova.utilities.bungee.BungeeOnlinePlayerStorage;
 
 public class KickCommand implements CommandExecutor {
 
@@ -29,21 +25,16 @@ public class KickCommand implements CommandExecutor {
         }
 
         Player targetPlayer = Nova.getInstance().getServer().getPlayer(strings[0]);
-        if (targetPlayer == null && !BungeeOnlinePlayerStorage.getOnlinePlayers().contains(strings[0])) {
+        if (targetPlayer == null) {
             cs.sendMessage(NovaMessages.PREFIX_ERROR + "That player isn't online.");
         } else {
-            if (targetPlayer != null) {
-                if (!targetPlayer.hasPermission("nova.kick")) {
-                    KickUtilities.kickPlayer(targetPlayer);
-                } else {
-                    cs.sendMessage(NovaMessages.PREFIX_ERROR + "You can't kick that player.");
-                    return true;
-                }
-                cs.sendMessage(NovaMessages.PREFIX_GENERAL + "The player " + ChatColor.GREEN + targetPlayer.getName() + ChatColor.GRAY + " was kicked successfully.");
+            if (!targetPlayer.hasPermission("nova.kick")) {
+                KickUtilities.kickPlayer(targetPlayer);
             } else {
-                new CloudMessage(strings[0], CloudMessageType.KICK.toString(), GeneralUtilities.getServerName(), GeneralUtilities.getPrettyServerName()).send();
-                cs.sendMessage(NovaMessages.PREFIX_GENERAL + "The player " + ChatColor.GREEN + strings[0] + ChatColor.GRAY + " was kicked successfully.");
+                cs.sendMessage(NovaMessages.PREFIX_ERROR + "You can't kick that player.");
+                return true;
             }
+            cs.sendMessage(NovaMessages.PREFIX_GENERAL + "The player " + ChatColor.GREEN + targetPlayer.getName() + ChatColor.GRAY + " was kicked successfully.");
         }
         return true;
     }

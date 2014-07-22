@@ -1,5 +1,8 @@
 package com.gameaurora.nova.modules.votifier;
 
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+
 import org.bukkit.ChatColor;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
@@ -22,6 +25,9 @@ public class VoteListener implements Listener {
         Nova.getInstance().getServer().broadcastMessage(ChatColor.translateAlternateColorCodes('&', NovaMessages.VOTE.replace("%player", vote.getUsername())));
         Nova.getInstance().getServer().broadcastMessage(NovaMessages.VOTE_SITE);
         Nova.getInstance().getServer().broadcastMessage(NovaMessages.BAR);
+        Nova.getInstance().getServer().broadcastMessage(NovaMessages.VOTE_CONTEST);
+        Nova.getInstance().getServer().broadcastMessage(ChatColor.AQUA + "http://gameaurora.com/contest");
+        Nova.getInstance().getServer().broadcastMessage(NovaMessages.BAR);
 
         for (Player player : Nova.getInstance().getServer().getOnlinePlayers()) {
             player.playSound(player.getLocation(), Sound.NOTE_PIANO, 1, 1);
@@ -34,6 +40,13 @@ public class VoteListener implements Listener {
         } else {
             Nova.getInstance().getServer().dispatchCommand(Nova.getInstance().getServer().getConsoleSender(), "fe grant " + vote.getUsername() + " 2000");
         }
+
+        String user = vote.getUsername().trim().toLowerCase();
+        String month = new SimpleDateFormat("MMM").format(Calendar.getInstance().getTime()).toLowerCase();
+        String path = "votes." + month + "." + user;
+        int votes = Nova.getInstance().getConfig().getString(path) != null ? Nova.getInstance().getConfig().getInt(path) : 0;
+        Nova.getInstance().getConfig().set(path, votes + 1);
+        Nova.getInstance().saveConfig();
     }
 
 }

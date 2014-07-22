@@ -1,6 +1,5 @@
 package com.gameaurora.nova.modules.chat;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -12,27 +11,22 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
-import org.bukkit.event.player.PlayerChatTabCompleteEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
-import org.bukkit.util.StringUtil;
 
 import com.gameaurora.nova.Nova;
 import com.gameaurora.nova.NovaMessages;
 import com.gameaurora.nova.modules.cloudmessages.CloudMessage;
 import com.gameaurora.nova.modules.cloudmessages.CloudMessageType;
 import com.gameaurora.nova.modules.cloudmessages.CloudMessageUtilities;
-import com.gameaurora.nova.modules.nametags.ServerScoreboard;
 import com.gameaurora.nova.utilities.GeneralUtilities;
-import com.gameaurora.nova.utilities.bungee.BungeeOnlinePlayerStorage;
 
 public class ChatListeners implements Listener {
 
     public static HashMap<UUID, Long> tracker = new HashMap<UUID, Long>();
 
-    @EventHandler(priority = EventPriority.HIGH)
+    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
     public void onAsyncChat(final AsyncPlayerChatEvent event) {
-
         final Player player = event.getPlayer();
         try {
             ConcurrentHashMap<String, ChatProfile> profiles = Nova.getInstance().chatData.profiles;
@@ -116,26 +110,11 @@ public class ChatListeners implements Listener {
     public void onPlayerJoin(PlayerJoinEvent event) {
         ChatProfile profile = new ChatProfile(event.getPlayer());
         Nova.getInstance().chatData.profiles.put(profile.getPlayer().getName(), profile);
-
-        if (Nova.getInstance().moduleIsEnabled("nametags")) {
-            ServerScoreboard board = new ServerScoreboard(event.getPlayer());
-            board.updateBoard();
-        }
     }
 
     @EventHandler(priority = EventPriority.HIGH)
     public void onPlayerQuit(PlayerQuitEvent event) {
         Nova.getInstance().chatData.profiles.remove(event.getPlayer().getName());
-    }
-
-    @EventHandler
-    public void onPlayerChatTabCompleteEvent(PlayerChatTabCompleteEvent event) {
-        ArrayList<String> matches = StringUtil.copyPartialMatches(event.getChatMessage().substring(event.getChatMessage().lastIndexOf(" ") + 1), new ArrayList<String>(BungeeOnlinePlayerStorage.getOnlinePlayers()), new ArrayList<String>(BungeeOnlinePlayerStorage.getOnlinePlayers().size()));
-        for (String p : matches) {
-            if (!event.getTabCompletions().contains(p)) {
-                event.getTabCompletions().add(p);
-            }
-        }
     }
 
     private String notReady() {

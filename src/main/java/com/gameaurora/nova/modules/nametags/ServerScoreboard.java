@@ -13,8 +13,9 @@ import org.bukkit.scoreboard.Team;
 
 import com.gameaurora.nova.Nova;
 import com.gameaurora.nova.utilities.PermissionUtilities;
-import com.gameaurora.nova.utilities.bungee.BungeeOnlinePlayerStorage;
 
+// TODO: getPlayer is deprecated. :(
+@SuppressWarnings("deprecation")
 public class ServerScoreboard {
 
     Player player;
@@ -27,7 +28,6 @@ public class ServerScoreboard {
 
     public static String offlinePlayerName = ChatColor.AQUA + "Your Tokens";
 
-    @SuppressWarnings("deprecation")
     public ServerScoreboard(Player player) {
         this.player = player;
         player.setScoreboard(Nova.getInstance().getServer().getScoreboardManager().getNewScoreboard());
@@ -46,18 +46,26 @@ public class ServerScoreboard {
             sidebarTeam = board.registerNewTeam("Tokens");
             sidebarTeam.addPlayer(Nova.getInstance().getServer().getOfflinePlayer(offlinePlayerName));
         }
+
+        // for (String playerName : BungeeOnlinePlayerStorage.getOnlinePlayers()) {
+        // updateBoard(playerName);
+        // }
     }
 
-    @SuppressWarnings("deprecation")
-    public void updateBoard() {
-        for (String playerName : BungeeOnlinePlayerStorage.getOnlinePlayers()) {
-            Team groupTeam = getTeam(PermissionUtilities.getGroupForPlayer(playerName));
-            if (!groupTeam.hasPlayer(Nova.getInstance().getServer().getOfflinePlayer(playerName))) {
-                groupTeam.addPlayer(Nova.getInstance().getServer().getOfflinePlayer(playerName));
-            }
-        }
-
-        player.setScoreboard(board);
+    public void updateBoard(String playerName) {
+        // OfflinePlayer offlinePlayer = Nova.getInstance().getServer().getOfflinePlayer(playerName);
+        // if (BungeeOnlinePlayerStorage.getOnlinePlayers().contains(playerName)) {
+        // Team groupTeam = getTeam(BungeeOnlinePlayerStorage.getRank(playerName));
+        // if (!groupTeam.hasPlayer(offlinePlayer)) {
+        // groupTeam.addPlayer(offlinePlayer);
+        // }
+        // } else {
+        // for (Team team : teams) {
+        // team.removePlayer(offlinePlayer);
+        // }
+        // }
+        //
+        // player.setScoreboard(board);
     }
 
     private Team getTeam(String name) {

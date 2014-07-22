@@ -18,11 +18,6 @@ public class PermissionUtilities {
         return service.getPlayerPrimaryGroup(player.getUniqueId());
     }
 
-    @SuppressWarnings("deprecation")
-    public static String getGroupForPlayer(String name) {
-        return service.getPlayerPrimaryGroup(name);
-    }
-
     public static String getChatFormat(Player player) {
         try {
             String prefix = service.getGroupMetadata(getGroupForPlayer(player), "prefix", Object.class).toString();

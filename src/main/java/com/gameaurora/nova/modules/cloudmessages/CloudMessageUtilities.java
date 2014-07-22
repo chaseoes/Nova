@@ -12,4 +12,8 @@ public class CloudMessageUtilities {
         return message + delimiter + fromName + delimiter + toName; // message|fromName|toName
     }
 
+    public static String createPlayerLoginString(String playerName, String playerRank) {
+        return playerName + delimiter + playerRank; // playerName|playerRank
+    }
+
 }
