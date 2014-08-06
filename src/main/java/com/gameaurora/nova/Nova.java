@@ -13,58 +13,48 @@ import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import com.gameaurora.nova.events.listeners.RegionEventListeners;
+import com.gameaurora.nova.general.listeners.PlayerJoinListener;
 import com.gameaurora.nova.modules.adminmode.AdminModeCommand;
 import com.gameaurora.nova.modules.adminmode.AdminModeListeners;
 import com.gameaurora.nova.modules.adminmode.AdminModeTask;
-import com.gameaurora.nova.modules.announcer.AnnouncerTask;
 import com.gameaurora.nova.modules.arrowtp.ArrowTeleportListeners;
 import com.gameaurora.nova.modules.autosave.AutosaveTask;
 import com.gameaurora.nova.modules.blockcommands.BlockCommandsCommands;
 import com.gameaurora.nova.modules.blockcommands.BlockCommandsListeners;
 import com.gameaurora.nova.modules.broadcast.BroadcastCommand;
 import com.gameaurora.nova.modules.broadcastfirstjoin.FirstJoinListener;
-import com.gameaurora.nova.modules.chat.ChatCommands;
-import com.gameaurora.nova.modules.chat.ChatData;
-import com.gameaurora.nova.modules.chat.ChatListeners;
-import com.gameaurora.nova.modules.chat.ChatUtilities;
-import com.gameaurora.nova.modules.cloudmessages.CloudMessageListeners;
-import com.gameaurora.nova.modules.cloudmessages.CloudMessageReceiveListener;
-import com.gameaurora.nova.modules.commandshortcuts.CommandShortcutListener;
-import com.gameaurora.nova.modules.creativepass.CreativePassListener;
-import com.gameaurora.nova.modules.emptybroadcast.EmptyBroadcastListener;
+import com.gameaurora.nova.modules.chatcommands.ChatCommands;
 import com.gameaurora.nova.modules.farmworld.FarmworldCommands;
 import com.gameaurora.nova.modules.farmworld.FarmworldListeners;
+import com.gameaurora.nova.modules.giveitems.GiveItemsListener;
+import com.gameaurora.nova.modules.guestrestrictions.RestrictionListener;
 import com.gameaurora.nova.modules.hidestream.HideStreamListener;
-import com.gameaurora.nova.modules.hubcommand.HubCommand;
 import com.gameaurora.nova.modules.infocommands.InfoCommands;
-import com.gameaurora.nova.modules.joinspawn.JoinSpawnListener;
-import com.gameaurora.nova.modules.kick.KickCommand;
-import com.gameaurora.nova.modules.lagtest.LagTestTask;
+import com.gameaurora.nova.modules.launchpads.PadCommands;
+import com.gameaurora.nova.modules.launchpads.PadListener;
+import com.gameaurora.nova.modules.lobbybuffs.BuffsListener;
 import com.gameaurora.nova.modules.logger.LogListener;
 import com.gameaurora.nova.modules.maintenancemode.MaintenanceModeTask;
 import com.gameaurora.nova.modules.menu.MenuListeners;
-import com.gameaurora.nova.modules.menu.MenuUtilities;
-import com.gameaurora.nova.modules.menu.PlayerCountUtilities;
 import com.gameaurora.nova.modules.menu.ServerMenuCommand;
 import com.gameaurora.nova.modules.nametags.ScoreboardListeners;
-import com.gameaurora.nova.modules.nametags.ServerScoreboard;
-import com.gameaurora.nova.modules.pads.PadCommands;
-import com.gameaurora.nova.modules.pads.PadListener;
-import com.gameaurora.nova.modules.pingchat.PingChatListener;
 import com.gameaurora.nova.modules.portals.PortalListener;
 import com.gameaurora.nova.modules.punch.PunchListener;
 import com.gameaurora.nova.modules.signcolors.SignColorListener;
 import com.gameaurora.nova.modules.signlinks.SignLinkListener;
-import com.gameaurora.nova.modules.superspeed.SuperSpeedListener;
-import com.gameaurora.nova.modules.teleport.TeleportCommand;
-import com.gameaurora.nova.modules.teleport.TeleportData;
-import com.gameaurora.nova.modules.tnt.TNTListener;
+import com.gameaurora.nova.modules.spawnonjoin.JoinSpawnListener;
+import com.gameaurora.nova.modules.teleportcommands.TeleportCommand;
+import com.gameaurora.nova.modules.teleportcommands.TeleportData;
 import com.gameaurora.nova.modules.votifier.VoteListener;
+import com.gameaurora.nova.utilities.DataConfiguration;
 import com.gameaurora.nova.utilities.GeneralUtilities;
+import com.gameaurora.nova.utilities.ModuleConfiguration;
 import com.gameaurora.nova.utilities.PlayerStateStorage;
-import com.gameaurora.nova.utilities.SQLUtilities;
 import com.gameaurora.nova.utilities.SerializableLocation;
 import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
+
+import de.slikey.effectlib.EffectLib;
+import de.slikey.effectlib.EffectManager;
 
 // TODO: getPlayer is deprecated. :(
 @SuppressWarnings("deprecation")
@@ -73,12 +63,12 @@ public class Nova extends JavaPlugin {
     private static Nova instance;
     public List<String> adminPlayers = new ArrayList<String>();
     public HashMap<String, PlayerStateStorage> adminPlayerStates = new HashMap<String, PlayerStateStorage>();
-    public HashMap<String, ServerScoreboard> playerScoreboards = new HashMap<String, ServerScoreboard>();
     public TeleportData teleportData;
-    public ChatData chatData;
-    private SQLUtilities sql;
     public static Location LOBBY_LOCATION;
     private WorldGuardPlugin worldGuard;
+
+    public EffectLib effectLib;
+    public EffectManager effectManager;
 
     public static Nova getInstance() {
         return instance;
@@ -89,7 +79,6 @@ public class Nova extends JavaPlugin {
         getConfig().options().copyDefaults(true);
         saveConfig();
         teleportData = new TeleportData();
-        chatData = new ChatData();
 
         getServer().getScheduler().runTaskLater(this, new Runnable() {
             public void run() {
@@ -97,32 +86,23 @@ public class Nova extends JavaPlugin {
             }
         }, 60L);
 
-        getServer().getPluginManager().registerEvents(new RegionEventListeners(), this);
-        getServer().getPluginManager().registerEvents(new CloudMessageListeners(), this);
+        effectLib = EffectLib.instance();
+        effectManager = new EffectManager(effectLib);
+
         getServer().getMessenger().registerOutgoingPluginChannel(this, "BungeeCord");
-        getServer().getMessenger().registerIncomingPluginChannel(this, "BungeeCord", new CloudMessageReceiveListener());
+
+        ModuleConfiguration.reload();
+        ModuleConfiguration.getConfig().options().copyDefaults(true);
+        ModuleConfiguration.save();
+        ModuleConfiguration.reload();
+
+        loadGeneralModules();
         loadModules();
 
         loadLobbyLocation();
 
-        for (String server : MenuUtilities.icons.keySet()) {
-            PlayerCountUtilities.requestPlayerCount(server);
-        }
-    }
-
-    public void onReload() {
-        for (String s : adminPlayers) {
-            Player player = getServer().getPlayerExact(s);
-            if (player != null) {
-                String[] str = null;
-                new AdminModeCommand().onCommand((CommandSender) player, getCommand("a"), "", str);
-            }
-        }
-
-        chatData.reloadProfiles();
-        getServer().getScheduler().cancelTasks(Nova.getInstance());
-
-        loadLobbyLocation();
+        DataConfiguration.reload();
+        DataConfiguration.save();
     }
 
     public void onDisable() {
@@ -135,11 +115,6 @@ public class Nova extends JavaPlugin {
         }
 
         getServer().getScheduler().cancelTasks(Nova.getInstance());
-
-        if (sql != null) {
-            sql.close();
-        }
-
         instance = null;
     }
 
@@ -175,172 +150,131 @@ public class Nova extends JavaPlugin {
         return true;
     }
 
-    public boolean moduleIsEnabled(String name) {
-        return getConfig().getStringList("modules").contains(name);
-    }
-
     public void teleportToLobby(Player player) {
         if (getServer().getWorld("lobby") != null) {
             player.teleport(getServer().getWorld("lobby").getSpawnLocation());
         }
     }
 
+    private void loadGeneralModules() {
+        PluginManager pm = getServer().getPluginManager();
+
+        // General Events
+        pm.registerEvents(new PlayerJoinListener(), this);
+
+        // Chat Commands
+        getCommand("clearchat").setExecutor(new ChatCommands());
+
+        // Sign Colors
+        pm.registerEvents(new SignColorListener(), this);
+
+        // Server Menu
+        pm.registerEvents(new MenuListeners(), this);
+        getCommand("s").setExecutor(new ServerMenuCommand());
+
+        // Sign Links
+        pm.registerEvents(new SignLinkListener(), this);
+
+        // Punch
+        pm.registerEvents(new PunchListener(), this);
+
+        // Block Commands
+        getCommand("bc").setExecutor(new BlockCommandsCommands());
+        pm.registerEvents(new BlockCommandsListeners(), this);
+
+        // Nametags
+        pm.registerEvents(new ScoreboardListeners(), this);
+
+        // Broadcast
+        getCommand("broadcast").setExecutor(new BroadcastCommand());
+
+        // Info Commands
+        getCommand("help").setExecutor(new InfoCommands());
+        getCommand("vote").setExecutor(new InfoCommands());
+        getCommand("member").setExecutor(new InfoCommands());
+        getCommand("rules").setExecutor(new InfoCommands());
+        getCommand("tos").setExecutor(new InfoCommands());
+        getCommand("privacy").setExecutor(new InfoCommands());
+        getCommand("livemap").setExecutor(new InfoCommands());
+        getCommand("store").setExecutor(new InfoCommands());
+        getCommand("mumble").setExecutor(new InfoCommands());
+
+    }
+
     private void loadModules() {
         PluginManager pm = getServer().getPluginManager();
-        if (moduleIsEnabled("logger")) {
+        if (getModule("logger").isEnabled()) {
             pm.registerEvents(new LogListener(), this);
         }
 
-        if (moduleIsEnabled("pads")) {
+        if (getModule("launch-pads").isEnabled()) {
             pm.registerEvents(new PadListener(), this);
-            getCommand("lp").setExecutor(new PadCommands());
+            getCommand("launchpad").setExecutor(new PadCommands());
         }
 
-        if (moduleIsEnabled("teleport")) {
+        if (getModule("teleport-commands").isEnabled()) {
             getCommand("teleport").setExecutor(new TeleportCommand());
             getCommand("teleporthere").setExecutor(new TeleportCommand());
             getCommand("teleportaccept").setExecutor(new TeleportCommand());
-            getCommand("teleportdeny").setExecutor(new TeleportCommand());
             getCommand("teleporttoggle").setExecutor(new TeleportCommand());
         }
 
-        if (moduleIsEnabled("portals")) {
+        if (getModule("portals").isEnabled()) {
+            pm.registerEvents(new RegionEventListeners(), this);
             pm.registerEvents(new PortalListener(), this);
         }
 
-        if (moduleIsEnabled("chat")) {
-            chatData.reloadProfiles();
-            pm.registerEvents(new ChatListeners(), this);
-            getCommand("clearchat").setExecutor(new ChatCommands());
-            getCommand("chat").setExecutor(new ChatCommands());
-            ChatUtilities.loadBannedWords();
-        }
-
-        if (moduleIsEnabled("signcolors")) {
-            pm.registerEvents(new SignColorListener(), this);
-        }
-
-        if (moduleIsEnabled("joinspawn")) {
+        if (getModule("spawn-on-join").isEnabled()) {
             pm.registerEvents(new JoinSpawnListener(), this);
         }
 
-        if (moduleIsEnabled("hubcommand")) {
-            getCommand("hub").setExecutor(new HubCommand());
-        }
-
-        if (moduleIsEnabled("hidestream")) {
+        if (getModule("hide-stream").isEnabled()) {
             pm.registerEvents(new HideStreamListener(), this);
         }
 
-        if (moduleIsEnabled("autosave")) {
-            getServer().getScheduler().runTaskTimer(this, new AutosaveTask(), 0L, 1200L);
+        if (getModule("auto-save").isEnabled()) {
+            getServer().getScheduler().runTaskTimer(this, new AutosaveTask(), 6000L, 6000L);
         }
 
-        if (moduleIsEnabled("adminmode")) {
+        if (getModule("admin-mode").isEnabled()) {
             getServer().getScheduler().runTaskTimer(this, new AdminModeTask(), 0L, 20L);
             getCommand("adminmode").setExecutor(new AdminModeCommand());
             pm.registerEvents(new AdminModeListeners(), this);
         }
 
-        if (moduleIsEnabled("menu")) {
-            MenuUtilities.loadIcons();
-            pm.registerEvents(new MenuListeners(), this);
-            getCommand("s").setExecutor(new ServerMenuCommand());
+        if (getModule("give-items").isEnabled()) {
+            pm.registerEvents(new GiveItemsListener(), this);
+
+            if (getModule("give-items").getConfig().getStringList("items").contains("TELEPORT_BOW")) {
+                pm.registerEvents(new ArrowTeleportListeners(), this);
+            }
         }
 
-        if (moduleIsEnabled("signlinks")) {
-            pm.registerEvents(new SignLinkListener(), this);
+        if (getModule("lobby-buffs").isEnabled()) {
+            pm.registerEvents(new BuffsListener(), this);
         }
 
-        if (moduleIsEnabled("punch")) {
-            pm.registerEvents(new PunchListener(), this);
-        }
-
-        if (moduleIsEnabled("arrowtp")) {
-            pm.registerEvents(new ArrowTeleportListeners(), this);
-        }
-
-        if (moduleIsEnabled("superspeed")) {
-            pm.registerEvents(new SuperSpeedListener(), this);
-        }
-
-        if (moduleIsEnabled("kick")) {
-            getCommand("kick").setExecutor(new KickCommand());
-        }
-
-        if (moduleIsEnabled("blockcommands")) {
-            getCommand("bc").setExecutor(new BlockCommandsCommands());
-            pm.registerEvents(new BlockCommandsListeners(), this);
-        }
-
-        if (moduleIsEnabled("maintenancemode")) {
-            getServer().getScheduler().runTaskTimer(this, new MaintenanceModeTask(), 0L, 3600L);
-        }
-
-        if (moduleIsEnabled("pingchat")) {
-            pm.registerEvents(new PingChatListener(), this);
-        }
-
-        if (moduleIsEnabled("commandshortcuts")) {
-            pm.registerEvents(new CommandShortcutListener(), this);
-        }
-
-        if (moduleIsEnabled("nametags")) {
-            pm.registerEvents(new ScoreboardListeners(), this);
-        }
-
-        if (moduleIsEnabled("announcer")) {
-            getServer().getScheduler().runTaskTimer(this, new AnnouncerTask(), 0L, 5L * 60L * 20L);
-        }
-
-        if (moduleIsEnabled("broadcastfirstjoin")) {
+        if (getModule("broadcast-first-join").isEnabled()) {
             pm.registerEvents(new FirstJoinListener(), this);
         }
 
-        if (moduleIsEnabled("creativepass")) {
-            pm.registerEvents(new CreativePassListener(), this);
-        }
-
-        if (moduleIsEnabled("votifier")) {
+        if (getModule("votifier").isEnabled()) {
             pm.registerEvents(new VoteListener(), this);
         }
 
-        if (moduleIsEnabled("farmworld")) {
+        if (getModule("maintenance-mode").isEnabled()) {
+            getServer().getScheduler().runTaskTimer(this, new MaintenanceModeTask(), 0L, 3600L);
+        }
+
+        if (getModule("farmworld").isEnabled()) {
             pm.registerEvents(new FarmworldListeners(), this);
             getCommand("farmworld").setExecutor(new FarmworldCommands());
         }
 
-        if (moduleIsEnabled("broadcast")) {
-            getCommand("broadcast").setExecutor(new BroadcastCommand());
+        if (getModule("guest-restrictions").isEnabled()) {
+            pm.registerEvents(new RestrictionListener(), this);
         }
 
-        if (moduleIsEnabled("tnt")) {
-            pm.registerEvents(new TNTListener(), this);
-        }
-
-        if (moduleIsEnabled("infocommands")) {
-            getCommand("help").setExecutor(new InfoCommands());
-            getCommand("vote").setExecutor(new InfoCommands());
-            getCommand("member").setExecutor(new InfoCommands());
-            getCommand("rules").setExecutor(new InfoCommands());
-            getCommand("tos").setExecutor(new InfoCommands());
-            getCommand("privacy").setExecutor(new InfoCommands());
-            getCommand("livemap").setExecutor(new InfoCommands());
-            getCommand("store").setExecutor(new InfoCommands());
-            getCommand("mumble").setExecutor(new InfoCommands());
-        }
-
-        if (moduleIsEnabled("emptybroadcast")) {
-            pm.registerEvents(new EmptyBroadcastListener(), this);
-        }
-
-        if (moduleIsEnabled("lagtest")) {
-            getServer().getScheduler().runTaskTimer(this, new LagTestTask(), 0L, 20L);
-        }
-    }
-
-    public SQLUtilities getSQL() {
-        return sql;
     }
 
     private void loadLobbyLocation() {
@@ -351,13 +285,8 @@ public class Nova extends JavaPlugin {
         return worldGuard;
     }
 
-    public void updateScoreboard(String playerName) {
-        for (Player player : getServer().getOnlinePlayers()) {
-            ServerScoreboard scoreboard = playerScoreboards.containsKey(player.getName()) ? playerScoreboards.get(player.getName()) : new ServerScoreboard(player);
-            playerScoreboards.remove(player.getName());
-            scoreboard.updateBoard(playerName);
-            playerScoreboards.put(player.getName(), scoreboard);
-        }
+    public NovaModule getModule(String moduleName) {
+        return new NovaModule(moduleName);
     }
 
 }

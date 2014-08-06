@@ -65,6 +65,10 @@ public class IconMenu implements Listener {
         player.openInventory(inventory);
     }
 
+    public int getSize() {
+        return size;
+    }
+
     public void destroy() {
         HandlerList.unregisterAll(this);
         handler = null;

@@ -2,7 +2,7 @@ name: ${project.name}
 main: ${project.groupId}.${upload.dbo.slug}.${project.name}
 version: ${project.version}
 description: ${project.description}
-softdepend: [zPermissions, WorldGuard, Vault, Votifier]
+softdepend: [MilkyWay, zPermissions, WorldGuard, Vault, Votifier]
 commands:
   ${upload.dbo.slug}:
     description: The central command for the ${project.name} plugin.
@@ -19,67 +19,30 @@ commands:
     description: Accept a teleport request.
     usage: /<command> [args]
     aliases: [tpaccept,tpa]
-  teleportdeny:
-    description: Deny a teleport request.
-    usage: /<command> [args]
-    aliases: [tpdeny,tpd]
   teleporttoggle:
     description: Toggle receiving teleport requests.
     usage: /<command> [args]
     aliases: [tptoggle,tpt]
-  permissions:
-    description: Nova permissions handler.
-    usage: /<command> [args]
-    aliases: [p,perm,perms]
-  hub:
-    description: Teleport to the hub server.
-    usage: /<command> [args]
-    aliases: [lobby,l,h,spawn]
   adminmode:
     description: Admin mode.
     usage: /<command> [args]
     aliases: [a]
-  ban:
-    description: Ban command.
-    usage: /<command> [args]
-  unban:
-    description: Unan command.
-    usage: /<command> [args]
-  isbanned:
-    description: Isbanned command.
-    usage: /<command> [args]
-  lp:
+  launchpad:
     description: Launch pads!
     usage: /<command> [args]
-  kick:
-    description: Kick command.
-    usage: /<command> [args]
+    aliases: [lp]
   bc:
     description: Block commands!
     usage: /<command> [args]
   s:
     description: Server menu!
     usage: /<command> [args]
-  tokens:
-    description: Tokens!
-    usage: /<command> [args]
-  message:
-    description: Message another player.
-    usage: /msg <player> <message>
-    aliases: [tell,message,whisper,pm,msg,w]
-  reply:
-    description: Reply to another player.
-    usage: /r <message>
-    aliases: [r]
   clearchat:
     description: Clear chat!
     usage: /<command> [args]
     aliases: [cc]
   farmworld:
     description: Farmworld!
-    usage: /<command> [args]
-  locate:
-    description: Where''s waldo?
     usage: /<command> [args]
   broadcast:
     description: Broadcast!
@@ -111,7 +74,4 @@ commands:
     usage: /<command> [args]
   mumble:
     description: Mumble!
-    usage: /<command> [args]
-  chat:
-    description: Chat!
     usage: /<command> [args]

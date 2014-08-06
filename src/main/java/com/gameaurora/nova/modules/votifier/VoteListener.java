@@ -11,6 +11,7 @@ import org.bukkit.event.Listener;
 
 import com.gameaurora.nova.Nova;
 import com.gameaurora.nova.NovaMessages;
+import com.gameaurora.nova.utilities.DataConfiguration;
 import com.vexsoftware.votifier.model.Vote;
 import com.vexsoftware.votifier.model.VotifierEvent;
 
@@ -34,19 +35,22 @@ public class VoteListener implements Listener {
         }
 
         Player player = Nova.getInstance().getServer().getPlayer(vote.getUsername().toLowerCase());
-        if (player != null) {
-            Nova.getInstance().getServer().dispatchCommand(Nova.getInstance().getServer().getConsoleSender(), "fe grant " + player.getName() + " 2000");
-            player.sendMessage(ChatColor.AQUA + "Thanks for voting, " + ChatColor.GREEN + player.getName() + ChatColor.AQUA + "! Check how much money you have by typing " + ChatColor.GREEN + "/money" + ChatColor.AQUA + "!");
-        } else {
-            Nova.getInstance().getServer().dispatchCommand(Nova.getInstance().getServer().getConsoleSender(), "fe grant " + vote.getUsername() + " 2000");
+        if (Nova.getInstance().getModule("votifier").getConfig().getBoolean("give-money")) {
+            if (player != null) {
+                Nova.getInstance().getServer().dispatchCommand(Nova.getInstance().getServer().getConsoleSender(), "fe grant " + player.getName() + " 500");
+            } else {
+                Nova.getInstance().getServer().dispatchCommand(Nova.getInstance().getServer().getConsoleSender(), "fe grant " + vote.getUsername() + " 500");
+            }
         }
 
-        String user = vote.getUsername().trim().toLowerCase();
-        String month = new SimpleDateFormat("MMM").format(Calendar.getInstance().getTime()).toLowerCase();
-        String path = "votes." + month + "." + user;
-        int votes = Nova.getInstance().getConfig().getString(path) != null ? Nova.getInstance().getConfig().getInt(path) : 0;
-        Nova.getInstance().getConfig().set(path, votes + 1);
-        Nova.getInstance().saveConfig();
+        if (Nova.getInstance().getModule("votifier").getConfig().getBoolean("count-votes")) {
+            String user = vote.getUsername().trim().toLowerCase();
+            String month = new SimpleDateFormat("MMM").format(Calendar.getInstance().getTime()).toLowerCase();
+            String path = "votes." + month + "." + user;
+            int votes = DataConfiguration.getConfig().getString(path) != null ? DataConfiguration.getConfig().getInt(path) : 0;
+            DataConfiguration.getConfig().set(path, votes + 1);
+            DataConfiguration.save();
+        }
     }
 
 }

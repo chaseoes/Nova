@@ -6,7 +6,6 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import com.gameaurora.nova.NovaMessages;
-import com.gameaurora.nova.utilities.BungeeUtilities;
 
 public class ServerMenuCommand implements CommandExecutor {
 
@@ -17,19 +16,7 @@ public class ServerMenuCommand implements CommandExecutor {
         }
 
         Player player = (Player) cs;
-
-        for (String server : MenuUtilities.icons.keySet()) {
-            PlayerCountUtilities.requestPlayerCount(server);
-        }
-
-        if (strings.length == 0) {
-            MenuUtilities.destroyCache(player);
-            MenuUtilities.open(player);
-        } else {
-            String server = strings[0];
-            BungeeUtilities.sendToServer(player, server);
-        }
+        ServerMenu.open(player);
         return true;
     }
-
 }

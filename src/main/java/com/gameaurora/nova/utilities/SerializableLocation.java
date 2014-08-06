@@ -1,45 +1,28 @@
 package com.gameaurora.nova.utilities;
 
 import org.bukkit.Location;
-import org.bukkit.World;
 
 import com.gameaurora.nova.Nova;
 
 public class SerializableLocation {
 
-    public static String locationToString(Location l) {
-        String w = l.getWorld().getName();
-        int x = l.getBlockX();
-        int y = l.getBlockY();
-        int z = l.getBlockZ();
-        float pitch = l.getPitch();
-        float yaw = l.getYaw();
-        return w + "." + x + "." + y + "." + z + "." + yaw + "." + pitch;
+    private static String SEPARATOR = "@";
+
+    public static Location stringToLocation(String string) {
+        String[] split = string.split("@");
+        return new Location(Nova.getInstance().getServer().getWorld(split[0]), Integer.parseInt(split[1]), Integer.parseInt(split[2]), Integer.parseInt(split[3]), Float.parseFloat(split[4]), Float.parseFloat(split[5]));
     }
 
-    public static Location stringToLocation(String s) {
-        String[] str = s.split("\\.");
-        World w = Nova.getInstance().getServer().getWorld(str[0]);
-        int x = Integer.parseInt(str[1]);
-        int y = Integer.parseInt(str[2]);
-        int z = Integer.parseInt(str[3]);
-        float yaw = Integer.parseInt(str[4]);
-        float pitch = Integer.parseInt(str[5]);
-        return new Location(w, x, y, z, yaw, pitch);
+    public static String locationToString(Location location) {
+        return location.getWorld().getName() + SEPARATOR + location.getX() + SEPARATOR + location.getY() + SEPARATOR + location.getZ() + SEPARATOR + location.getYaw() + SEPARATOR + location.getPitch();
     }
 
-    public static boolean compareLocations(Location one, Location two) {
-        String w = one.getWorld().getName();
-        int x = one.getBlockX();
-        int y = one.getBlockY();
-        int z = one.getBlockZ();
+    public static Location simplify(Location location) {
+        return new Location(location.getWorld(), location.getBlockX(), location.getBlockY(), location.getBlockZ(), 0F, 0F);
+    }
 
-        String checkw = two.getWorld().getName();
-        int checkx = two.getBlockX();
-        int checky = two.getBlockY();
-        int checkz = two.getBlockZ();
-
-        return w.equalsIgnoreCase(checkw) && x == checkx && y == checky && z == checkz;
+    public static boolean compare(Location one, Location two) {
+        return one.getWorld().getName().equals(two.getWorld().getName()) && one.getBlockX() == two.getBlockX() && one.getBlockY() == two.getBlockY() && one.getBlockZ() == two.getBlockZ();
     }
 
 }

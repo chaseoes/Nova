@@ -1,0 +1,41 @@
+logger:
+  enabled: false
+  log:
+  - HOPPER
+launch-pads:
+  enabled: false
+teleport-commands:
+  enabled: false
+portals:
+  enabled: false
+spawn-on-join:
+  enabled: false
+  location: lobby@0@150@0@0@0
+hide-stream:
+  enabled: false
+auto-save:
+  enabled: false
+admin-mode:
+  enabled: false
+give-items:
+  enabled: false
+  items:
+  - SERVER_SELECTOR
+  - TRAIL_SELECTOR
+  - TELEPORT_BOW
+lobby-buffs:
+  enabled: false
+  buffs:
+  - SUPER_SPEED
+broadcast-first-join:
+  enabled: false
+votifier:
+  enabled: false
+  count-votes: false
+  give-money: true
+farmworld:
+  enabled: false
+guest-restrictions:
+  enabled: false
+maintenance-mode:
+  enabled: false

@@ -66,6 +66,8 @@ public class InfoCommands implements CommandExecutor {
                 cs.sendMessage(ChatColor.GREEN + "You have voted " + ChatColor.AQUA + votes + ChatColor.GREEN + " times this month.");
                 cs.sendMessage(ChatColor.GRAY + "Remember to spell your username properly (it is case-sensitive) to have your votes count.");
                 cs.sendMessage(NovaMessages.BAR);
+                // cs.sendMessage(ChatColor.GREEN + getTopVoters(5));
+                // cs.sendMessage(NovaMessages.BAR);
             }
         }
 
@@ -106,4 +108,21 @@ public class InfoCommands implements CommandExecutor {
         }
         return true;
     }
+
+    public static String getTopVoters(int size) {
+        String topVoter = "";
+        int topVote = 0;
+        for (String player : Nova.getInstance().getConfig().getConfigurationSection("votes.jul").getKeys(false)) {
+            int v = Nova.getInstance().getConfig().getInt("votes." + "jul" + "." + player);
+            if (v > topVote) {
+                if (!player.equalsIgnoreCase("missrandall") && !player.equalsIgnoreCase("gnisl") && !player.equalsIgnoreCase("immortalmuggle") && !player.equalsIgnoreCase("budderking0909")) {
+                    topVote = v;
+                    topVoter = player;
+                }
+            }
+        }
+
+        return topVoter;
+    }
+
 }

@@ -1,47 +1,25 @@
 package com.gameaurora.nova.utilities;
 
-import org.bukkit.ChatColor;
-import org.bukkit.entity.Player;
-import org.tyrannyofheaven.bukkit.zPermissions.ZPermissionsService;
+import java.util.Set;
 
-import com.gameaurora.nova.Nova;
+import org.bukkit.entity.Player;
 
 public class PermissionUtilities {
 
-    private static ZPermissionsService service = Nova.getInstance().getServer().getServicesManager().load(ZPermissionsService.class);
-
-    public static ZPermissionsService getServiceProvider() {
-        return service;
+    public static Set<String> getGroups() {
+        return com.gameaurora.milkyway.utilities.PermissionUtilities.getGroups();
     }
 
-    public static String getGroupForPlayer(Player player) {
-        return service.getPlayerPrimaryGroup(player.getUniqueId());
+    public static String getPrimaryGroup(Player player) {
+        return com.gameaurora.milkyway.utilities.PermissionUtilities.getPrimaryGroup(player);
     }
 
-    public static String getChatFormat(Player player) {
-        try {
-            String prefix = service.getGroupMetadata(getGroupForPlayer(player), "prefix", Object.class).toString();
-            return ChatColor.translateAlternateColorCodes('&', prefix.replace("<player>", "%1$s").replace("<message>", "%2$s"));
-        } catch (Exception e) {
-            return ChatColor.RED + getGroupForPlayer(player) + " CHAT ERROR" + "\n" + player.getUniqueId().toString();
-        }
+    public static String getPrefix(String group) {
+        return com.gameaurora.milkyway.utilities.PermissionUtilities.getPrefix(group);
     }
 
-    public static String getChatPrefix(String group) {
-        try {
-            String prefix = service.getGroupMetadata(group, "prefix", Object.class).toString();
-            return ChatColor.translateAlternateColorCodes('&', prefix.replace("<player>", "%1$s").replace(":", "").replace("<message>", ""));
-        } catch (Exception e) {
-            return ChatColor.RED + "ERROR";
-        }
+    public static String getSuffix(String group) {
+        return com.gameaurora.milkyway.utilities.PermissionUtilities.getSuffix(group);
     }
 
-    public static String getChatSuffix(String group) {
-        try {
-            String suffix = service.getGroupMetadata(group, "suffix", Object.class).toString();
-            return ChatColor.translateAlternateColorCodes('&', suffix);
-        } catch (Exception e) {
-            return "";
-        }
-    }
 }
